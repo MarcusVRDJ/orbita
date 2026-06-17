@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════════
+  ÓRBITA · Trabalho de Grau 2 — Engenharia de Usabilidade
+  Páginas: index.html (landing) · app.html (sistema) · wireframes.html
+  Hospede a pasta inteira. Para personalizar, procure por:
+    "EQUIPE" (nomes do grupo) e "DADOS_TESTE" (resultados reais dos testes)
+  ═══════════════════════════════════════════════════════════════════
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Protótipo de baixa fidelidade do Órbita: seis wireframes anotados e as decisões de design até a versão final.">
+<meta name="theme-color" content="#070a14">
+<title>Órbita · Wireframes — baixa fidelidade</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script>document.documentElement.className += ' js';</script>
+<style>
+
+/* ════════ TOKENS (Heurística 4 — consistência via design system) ════════ */
+:root{
+  --bg-0:#070a14; --bg-1:#0b1020; --bg-2:#111834; --bg-3:#1a2244;
+  --tinta:#ece8db; --tinta-2:#bcb7a6; --tinta-3:#8d8a7e;
+  --ouro:#d4af6a; --ouro-claro:#ecd29b; --ouro-fundo:rgba(212,175,106,.12);
+  --azul:#7fa8d9; --roxo:#9b8cc9; --verde:#8fbf9f; --rosa:#d98fa8; --laranja:#d9a87f;
+  --erro:#e08c8c; --ok:#8fbf9f;
+  --borda:rgba(212,175,106,.16); --borda-forte:rgba(212,175,106,.34);
+  --vidro:rgba(13,19,40,.62);
+  --serif:'Fraunces',Georgia,serif; --texto:'Spectral',Georgia,serif; --mono:'Space Mono',monospace;
+  --raio:16px; --raio-p:10px;
+  --suave:cubic-bezier(.22,.7,.25,1);
+  --sombra:0 18px 50px rgba(0,0,0,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg-0); color:var(--tinta);
+  font-family:var(--texto); font-weight:300; font-size:1.06rem; line-height:1.7;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+body.trava{overflow:hidden}
+img,svg,canvas{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font:inherit}
+a{color:var(--ouro-claro);text-decoration:none}
+::selection{background:rgba(212,175,106,.32);color:#fff}
+:focus-visible{outline:2px solid var(--ouro);outline-offset:3px;border-radius:4px}
+
+/* acessibilidade */
+.pular{position:absolute;left:-999px;top:0;background:var(--ouro);color:#1a1408;padding:.7rem 1.2rem;z-index:200;font-family:var(--mono);font-size:.85rem;border-radius:0 0 8px 0}
+.pular:focus{left:0}
+.so-leitor{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ════════ FUNDO GALÁCTICO ════════ */
+#ceu{position:fixed;inset:0;z-index:0;pointer-events:none}
+.nebulosa{position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0;will-change:transform}
+.neb-a{width:62vw;height:62vw;top:-22vw;right:-18vw;background:radial-gradient(circle,rgba(212,175,106,.13),transparent 65%)}
+.neb-b{width:55vw;height:55vw;top:48vh;left:-22vw;background:radial-gradient(circle,rgba(127,168,217,.12),transparent 65%)}
+.neb-c{width:48vw;height:48vw;top:130vh;right:-14vw;background:radial-gradient(circle,rgba(155,140,201,.11),transparent 65%)}
+#brilhoCursor{position:fixed;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,rgba(236,210,155,.55),transparent 70%);pointer-events:none;z-index:90;transform:translate(-50%,-50%);mix-blend-mode:screen;opacity:0;transition:opacity .4s}
+@media (hover:none){#brilhoCursor{display:none}}
+
+#conteudo{position:relative;z-index:1}
+
+/* barra de progresso do scroll — cauda de cometa */
+#progScroll{position:fixed;top:0;left:0;height:3px;width:100%;z-index:120;transform-origin:left;transform:scaleX(var(--prog,0));background:linear-gradient(90deg,transparent,var(--ouro) 60%,var(--ouro-claro));box-shadow:0 0 12px rgba(212,175,106,.7)}
+
+/* ════════ NAVEGAÇÃO ════════ */
+#navPrincipal{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.1rem clamp(1.2rem,4vw,3rem);transition:padding .4s var(--suave),background .4s,border-color .4s;border-bottom:1px solid transparent}
+#navPrincipal.compacta{padding-top:.6rem;padding-bottom:.6rem;background:rgba(7,10,20,.78);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom-color:var(--borda)}
+.marca{font-family:var(--serif);font-weight:600;font-size:1.35rem;letter-spacing:.16em;color:var(--tinta);display:flex;align-items:center;gap:.55rem}
+.marca-orbe{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 32% 30%,var(--ouro-claro),var(--ouro) 55%,#6e5526);box-shadow:0 0 12px rgba(212,175,106,.8);position:relative}
+.marca-orbe::after{content:"";position:absolute;inset:-5px -9px;border:1px solid rgba(212,175,106,.5);border-radius:50%;transform:rotateX(68deg)}
+.nav-elos{display:flex;gap:2rem;align-items:center;list-style:none}
+.nav-elos a{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta-2);transition:color .3s}
+.nav-elos a:hover{color:var(--ouro-claro)}
+#menuBtn{display:none;flex-direction:column;gap:5px;padding:.5rem}
+#menuBtn span{width:24px;height:2px;background:var(--tinta);transition:transform .3s var(--suave),opacity .3s}
+#menuBtn[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+#menuBtn[aria-expanded="true"] span:nth-child(2){opacity:0}
+#menuBtn[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* ════════ HERO ════════ */
+.heroi{min-height:100svh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:2rem;padding:7.5rem clamp(1.2rem,5vw,5rem) 4rem;max-width:1400px;margin:0 auto;position:relative}
+.kicker{font-family:var(--mono);font-size:.74rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ouro);display:flex;align-items:center;gap:.8rem}
+.kicker::before{content:"";width:34px;height:1px;background:var(--ouro)}
+.heroi h1{font-family:var(--serif);font-weight:300;font-size:clamp(3.4rem,8.5vw,6.4rem);line-height:1.02;letter-spacing:.01em;margin:1.2rem 0 1.4rem}
+.heroi h1 em{font-style:italic;font-weight:600;color:var(--ouro-claro)}
+.heroi p.sub{font-size:clamp(1.02rem,1.5vw,1.2rem);color:var(--tinta-2);max-width:34rem}
+.heroi-acoes{display:flex;gap:1rem;margin-top:2.4rem;flex-wrap:wrap}
+.selo-g2{display:inline-block;margin-top:2.6rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;color:var(--tinta-3);border:1px solid var(--borda);border-radius:999px;padding:.45rem 1rem}
+
+.btn{display:inline-flex;align-items:center;gap:.6rem;font-family:var(--mono);font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;padding:.95rem 1.7rem;border-radius:999px;transition:transform .3s var(--suave),box-shadow .3s,background .3s,color .3s;border:1px solid transparent}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0)}
+.btn-ouro{background:linear-gradient(135deg,var(--ouro-claro),var(--ouro));color:#1d1506;box-shadow:0 8px 28px rgba(212,175,106,.3)}
+.btn-ouro:hover{box-shadow:0 12px 36px rgba(212,175,106,.45)}
+.btn-fantasma{border-color:var(--borda-forte);color:var(--tinta)}
+.btn-fantasma:hover{background:var(--ouro-fundo)}
+
+/* planeta do hero */
+.heroi-ceu{position:relative;display:grid;place-items:center;perspective:900px}
+.flutuar{animation:flutuar 7s ease-in-out infinite}
+@keyframes flutuar{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+#tilt3d{transform-style:preserve-3d;transition:transform .25s ease-out}
+.planeta-heroi{width:clamp(230px,26vw,360px);aspect-ratio:1;border-radius:50%;position:relative;
+  background:radial-gradient(circle at 31% 28%,#f3deae 0%,var(--ouro) 38%,#8a6a33 68%,#3a2c12 100%);
+  box-shadow:inset -26px -22px 60px rgba(0,0,0,.55),0 0 90px rgba(212,175,106,.35)}
+.planeta-heroi::before{content:"";position:absolute;inset:14% 6% auto;height:9%;border-radius:50%;background:rgba(255,255,255,.07);filter:blur(3px);transform:rotate(-8deg)}
+.planeta-heroi::after{content:"";position:absolute;inset:52% 10% auto;height:7%;border-radius:50%;background:rgba(58,44,18,.35);filter:blur(4px);transform:rotate(-6deg)}
+.anel{position:absolute;left:50%;top:50%;width:172%;height:172%;transform:translate(-50%,-50%) rotateX(74deg);border-radius:50%;border:2px solid rgba(236,210,155,.4);box-shadow:0 0 20px rgba(212,175,106,.25)}
+.anel.fino{width:154%;height:154%;border-color:rgba(236,210,155,.18);border-width:1px}
+.lua-orbita{position:absolute;inset:-14%;animation:girar 26s linear infinite}
+.lua-orbita.dois{inset:-30%;animation-duration:44s;animation-direction:reverse}
+.lua{position:absolute;top:50%;left:0;width:22px;height:22px;margin:-11px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#dfe6f2,var(--azul) 55%,#2b3c58);box-shadow:0 0 14px rgba(127,168,217,.7)}
+.lua-orbita.dois .lua{width:14px;height:14px;margin:-7px;background:radial-gradient(circle at 32% 30%,#e6dff2,var(--roxo) 55%,#3a3258)}
+@keyframes girar{to{transform:rotate(360deg)}}
+
+.indicador-rolar{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.6rem;color:var(--tinta-3);font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase}
+.indicador-rolar .fio{width:1px;height:44px;background:linear-gradient(var(--ouro),transparent);position:relative;overflow:hidden}
+.indicador-rolar .fio::after{content:"";position:absolute;top:-8px;left:-2px;width:5px;height:5px;border-radius:50%;background:var(--ouro-claro);animation:cair 2.2s ease-in infinite}
+@keyframes cair{to{transform:translateY(52px)}}
+
+/* ════════ ESTRUTURA DE SEÇÕES ════════ */
+.secao{padding:clamp(4.5rem,9vw,8rem) clamp(1.2rem,5vw,3rem);scroll-margin-top:80px;position:relative}
+.miolo{max-width:1180px;margin:0 auto}
+.cab-secao{max-width:640px;margin-bottom:clamp(2.5rem,5vw,4rem)}
+.cab-secao h2{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,4.4vw,3.2rem);line-height:1.12;margin:1rem 0 1.1rem}
+.cab-secao h2 em{font-style:italic;color:var(--ouro-claro)}
+.cab-secao p{color:var(--tinta-2)}
+.cartao{background:var(--vidro);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--borda);border-radius:var(--raio);padding:1.8rem;transition:border-color .4s,transform .4s var(--suave)}
+.cartao:hover{border-color:var(--borda-forte)}
+
+/* revelação no scroll */
+.js .revelar{opacity:0;transform:translateY(28px);transition:opacity .9s var(--suave),transform .9s var(--suave);transition-delay:var(--atraso,0s)}
+.js .revelar.visivel{opacity:1;transform:none}
+.js .revelar-esq{opacity:0;transform:translateX(-34px);transition:opacity .9s var(--suave),transform .9s var(--suave);transition-delay:var(--atraso,0s)}
+.js .revelar-esq.visivel{opacity:1;transform:none}
+.js .revelar-zoom{opacity:0;transform:scale(.92);transition:opacity .9s var(--suave),transform .9s var(--suave);transition-delay:var(--atraso,0s)}
+.js .revelar-zoom.visivel{opacity:1;transform:none}
+
+/* O PROJETO */
+.grade-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem}
+.cartao .icone{width:46px;height:46px;border-radius:12px;background:var(--ouro-fundo);border:1px solid var(--borda);display:grid;place-items:center;font-size:1.3rem;margin-bottom:1.1rem}
+.cartao h3{font-family:var(--serif);font-weight:600;font-size:1.22rem;margin-bottom:.55rem}
+.cartao p{color:var(--tinta-2);font-size:.97rem}
+.faixa-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:3.2rem;border-top:1px solid var(--borda);border-bottom:1px solid var(--borda);padding:2rem 0}
+.stat{text-align:center}
+.stat .num{font-family:var(--serif);font-weight:600;font-size:clamp(2rem,4vw,2.9rem);color:var(--ouro-claro);line-height:1}
+.stat .rotulo{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-3);margin-top:.6rem;display:block}
+
+/* COMO FUNCIONA */
+.passos{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem;counter-reset:passo;position:relative}
+.passo{position:relative;padding:2rem 1.6rem;border:1px solid var(--borda);border-radius:var(--raio);background:var(--vidro)}
+.passo::before{counter-increment:passo;content:"0" counter(passo);font-family:var(--mono);font-size:.78rem;letter-spacing:.2em;color:var(--ouro);display:block;margin-bottom:1rem}
+.passo h3{font-family:var(--serif);font-weight:600;font-size:1.3rem;margin-bottom:.6rem}
+.passo p{color:var(--tinta-2);font-size:.96rem}
+.linha-orbital{position:absolute;top:-34px;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,var(--borda-forte),transparent)}
+
+
+/* ════════ PROTÓTIPO — MOLDURA DO APP ════════ */
+.app-moldura{border:1px solid var(--borda-forte);border-radius:22px;overflow:hidden;box-shadow:var(--sombra);background:rgba(9,13,28,.85);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.app-barra-janela{display:flex;align-items:center;gap:.9rem;padding:.8rem 1.2rem;border-bottom:1px solid var(--borda);background:rgba(7,10,20,.6)}
+.pontos{display:flex;gap:.45rem}
+.pontos span{width:11px;height:11px;border-radius:50%;background:var(--bg-3);border:1px solid var(--borda)}
+.url-falsa{flex:1;text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--tinta-3);letter-spacing:.08em}
+.app{display:grid;grid-template-columns:218px 1fr;min-height:620px}
+
+/* navegação interna do app (H6 — reconhecimento: sempre visível) */
+.app-nav{border-right:1px solid var(--borda);padding:1.4rem .9rem;display:flex;flex-direction:column;gap:.35rem;background:rgba(7,10,20,.4)}
+.app-nav .titulo-nav{font-family:var(--mono);font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:var(--tinta-3);padding:0 .8rem .8rem}
+.aba{display:flex;align-items:center;gap:.7rem;width:100%;text-align:left;padding:.72rem .9rem;border-radius:var(--raio-p);font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;color:var(--tinta-2);transition:background .25s,color .25s}
+.aba:hover{background:rgba(212,175,106,.08);color:var(--tinta)}
+.aba[aria-selected="true"]{background:var(--ouro-fundo);color:var(--ouro-claro);border:1px solid var(--borda)}
+.aba .atalho{margin-left:auto;font-size:.62rem;color:var(--tinta-3);border:1px solid var(--borda);border-radius:5px;padding:.06rem .4rem}
+.app-nav .rodape-nav{margin-top:auto;padding:.8rem}
+.btn-ajuda{width:100%;justify-content:center}
+
+.app-telas{padding:clamp(1.2rem,3vw,2.2rem);min-width:0}
+.tela[hidden]{display:none}
+.tela-cab{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:1.6rem;flex-wrap:wrap}
+.tela-cab h3{font-family:var(--serif);font-weight:600;font-size:1.5rem}
+.tela-cab .data{font-family:var(--mono);font-size:.72rem;color:var(--tinta-3);letter-spacing:.1em}
+
+/* dica de primeiro uso (H10) */
+.dica-inicial{display:flex;gap:.8rem;align-items:center;background:var(--ouro-fundo);border:1px solid var(--borda);border-radius:var(--raio-p);padding:.8rem 1rem;font-size:.92rem;color:var(--tinta-2);margin-bottom:1.4rem}
+.dica-inicial button{margin-left:auto;color:var(--tinta-3);font-size:1.1rem;line-height:1;padding:.2rem .4rem}
+.dica-inicial button:hover{color:var(--tinta)}
+
+/* PAINEL */
+.grade-stats-app{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;margin-bottom:1.6rem}
+.stat-app{border:1px solid var(--borda);border-radius:var(--raio-p);padding:1rem;background:rgba(13,19,40,.5)}
+.stat-app .v{font-family:var(--serif);font-weight:600;font-size:1.7rem;color:var(--ouro-claro);line-height:1.1}
+.stat-app .r{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-3);display:block;margin-top:.35rem}
+.bloco-app{border:1px solid var(--borda);border-radius:var(--raio);padding:1.3rem;background:rgba(13,19,40,.5);margin-bottom:1.2rem}
+.bloco-app h4{font-family:var(--serif);font-weight:600;font-size:1.08rem;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.acoes-rapidas{display:flex;gap:.8rem;flex-wrap:wrap}
+
+/* listas de tarefas (H1 — status; H3 — desfazer) */
+.lista-tarefas{list-style:none;display:flex;flex-direction:column;gap:.55rem}
+.item-tarefa{display:flex;align-items:center;gap:.8rem;padding:.65rem .8rem;border:1px solid var(--borda);border-radius:var(--raio-p);background:rgba(7,10,20,.35);transition:border-color .3s}
+.item-tarefa:hover{border-color:var(--borda-forte)}
+.item-tarefa.feita .t-titulo{text-decoration:line-through;color:var(--tinta-3)}
+.t-titulo{flex:1;font-size:.95rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip-materia{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;padding:.18rem .55rem;border-radius:999px;border:1px solid var(--borda);color:var(--tinta-2);white-space:nowrap}
+.caixa{appearance:none;-webkit-appearance:none;width:21px;height:21px;border:1.5px solid var(--borda-forte);border-radius:7px;cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:background .25s,border-color .25s;background:transparent}
+.caixa:checked{background:var(--ouro);border-color:var(--ouro)}
+.caixa:checked::after{content:"✓";color:#1d1506;font-size:.78rem;font-weight:700}
+.t-excluir{color:var(--tinta-3);font-size:1rem;padding:.2rem .45rem;border-radius:6px;opacity:.55;transition:opacity .2s,color .2s}
+.item-tarefa:hover .t-excluir,.t-excluir:focus-visible{opacity:1}
+.t-excluir:hover{color:var(--erro)}
+.vazio{border:1px dashed var(--borda-forte);border-radius:var(--raio-p);padding:1.6rem;text-align:center;color:var(--tinta-3);font-size:.93rem}
+.vazio strong{color:var(--tinta-2);display:block;font-family:var(--serif);font-size:1.05rem;margin-bottom:.3rem}
+
+/* MATÉRIAS — sistema solar (elemento-assinatura) */
+.materias-grade{display:grid;grid-template-columns:1.15fr .85fr;gap:1.4rem;align-items:start}
+.sistema{position:relative;aspect-ratio:1/1;max-width:560px;margin:0 auto;width:100%}
+.sol{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff3d4,var(--ouro-claro) 40%,var(--ouro) 70%,#7a5c26);box-shadow:0 0 46px rgba(212,175,106,.85),0 0 110px rgba(212,175,106,.35);animation:pulsar 4.5s ease-in-out infinite;z-index:2}
+@keyframes pulsar{0%,100%{box-shadow:0 0 46px rgba(212,175,106,.85),0 0 110px rgba(212,175,106,.35)}50%{box-shadow:0 0 60px rgba(212,175,106,1),0 0 150px rgba(212,175,106,.5)}}
+.sol .sol-rotulo{position:absolute;top:110%;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;color:var(--tinta-3);white-space:nowrap}
+.orbita{position:absolute;border:1px dashed rgba(212,175,106,.22);border-radius:50%;animation:girar linear infinite}
+.sistema:hover .orbita,.sistema:hover .contra-giro{animation-play-state:paused}
+.orb-1{inset:31%;animation-duration:42s}
+.orb-2{inset:21%;animation-duration:58s}
+.orb-3{inset:11%;animation-duration:76s}
+.orb-4{inset:1%;animation-duration:96s}
+.planeta{position:absolute;top:0;left:50%;transform:translate(-50%,-50%)}
+.contra-giro{animation:girar linear infinite reverse;display:block}
+.orb-1 .contra-giro{animation-duration:42s}
+.orb-2 .contra-giro{animation-duration:58s}
+.orb-3 .contra-giro{animation-duration:76s}
+.orb-4 .contra-giro{animation-duration:96s}
+.esfera{border-radius:50%;position:relative;display:grid;place-items:center;transition:transform .35s var(--suave),box-shadow .35s;cursor:pointer}
+.esfera:hover{transform:scale(1.12)}
+.esfera.ativa{box-shadow:0 0 0 3px var(--bg-0),0 0 0 5px var(--ouro)!important}
+.esfera.com-anel::before{content:"";position:absolute;left:50%;top:50%;width:158%;height:158%;transform:translate(-50%,-50%) rotateX(72deg);border-radius:50%;border:1.5px solid rgba(236,232,219,.4)}
+.esfera .nome-planeta{position:absolute;top:106%;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;color:var(--tinta-2);white-space:nowrap;background:rgba(7,10,20,.7);padding:.14rem .5rem;border-radius:999px;border:1px solid var(--borda);pointer-events:none}
+.legenda-sistema{text-align:center;font-size:.85rem;color:var(--tinta-3);margin-top:1rem;font-style:italic}
+
+/* painel de detalhe da matéria */
+.detalhe-materia{border:1px solid var(--borda);border-radius:var(--raio);background:rgba(13,19,40,.55);padding:1.4rem;position:sticky;top:90px}
+.det-cab{display:flex;align-items:center;gap:.9rem;margin-bottom:1.1rem}
+.det-orbe{width:40px;height:40px;border-radius:50%;flex-shrink:0}
+.det-cab h4{font-family:var(--serif);font-weight:600;font-size:1.2rem;flex:1;min-width:0}
+.det-meta{display:flex;gap:1.4rem;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--tinta-3);text-transform:uppercase;margin-bottom:1rem;flex-wrap:wrap}
+.det-meta strong{color:var(--ouro-claro);font-weight:400}
+.barra-prog{height:7px;border-radius:999px;background:rgba(236,232,219,.1);overflow:hidden;margin-bottom:1.3rem}
+.barra-prog .preench{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ouro),var(--ouro-claro));transition:width .7s var(--suave)}
+.form-linha{display:flex;gap:.6rem;margin-top:1rem}
+.campo{flex:1;background:rgba(7,10,20,.55);border:1px solid var(--borda);border-radius:var(--raio-p);padding:.65rem .9rem;color:var(--tinta);font-size:.92rem;min-width:0}
+.campo::placeholder{color:var(--tinta-3)}
+.campo:focus{outline:2px solid var(--ouro);outline-offset:1px;border-color:transparent}
+.btn-mini{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;padding:.62rem 1.05rem;border-radius:var(--raio-p);background:var(--ouro);color:#1d1506;transition:transform .25s,box-shadow .25s;white-space:nowrap}
+.btn-mini:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(212,175,106,.35)}
+.btn-mini.contorno{background:transparent;border:1px solid var(--borda-forte);color:var(--tinta-2)}
+.btn-mini.contorno:hover{background:var(--ouro-fundo);color:var(--tinta)}
+.btn-mini.perigo{background:transparent;border:1px solid rgba(224,140,140,.4);color:var(--erro)}
+.btn-mini.perigo:hover{background:rgba(224,140,140,.1)}
+.det-acoes{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+
+/* FOCO — pomodoro */
+.foco-grade{display:grid;grid-template-columns:auto 1fr;gap:clamp(1.5rem,4vw,3rem);align-items:center}
+.anel-wrap{position:relative;width:clamp(220px,30vw,280px);aspect-ratio:1}
+.anel-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.anel-fundo{fill:none;stroke:rgba(236,232,219,.09);stroke-width:7}
+.anel-prog{fill:none;stroke:url(#gradAnel);stroke-width:7;stroke-linecap:round;stroke-dasharray:703.7;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear}
+.anel-centro{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.tempo{font-family:var(--serif);font-weight:300;font-size:clamp(2.6rem,6vw,3.6rem);letter-spacing:.04em;line-height:1}
+.fase{font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--ouro);margin-top:.5rem}
+.foco-controles label{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-3);display:block;margin:1.1rem 0 .5rem}
+.presets{display:flex;gap:.5rem;flex-wrap:wrap}
+.preset{font-family:var(--mono);font-size:.72rem;padding:.45rem .85rem;border:1px solid var(--borda);border-radius:999px;color:var(--tinta-2);transition:all .25s}
+.preset:hover{border-color:var(--borda-forte);color:var(--tinta)}
+.preset[aria-pressed="true"]{background:var(--ouro-fundo);border-color:var(--ouro);color:var(--ouro-claro)}
+.foco-acoes{display:flex;gap:.8rem;margin-top:1.6rem;flex-wrap:wrap}
+.sessoes-info{font-size:.9rem;color:var(--tinta-3);margin-top:1.2rem}
+.sessoes-info strong{color:var(--ouro-claro);font-weight:500}
+
+/* PROGRESSO */
+.prog-grade{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem}
+.grafico{display:flex;align-items:flex-end;gap:.7rem;height:190px;padding-top:.5rem}
+.coluna-dia{flex:1;display:flex;flex-direction:column;align-items:center;gap:.5rem;height:100%;justify-content:flex-end}
+.barra-dia{width:100%;max-width:38px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--ouro-claro),var(--ouro) 60%,rgba(212,175,106,.4));min-height:4px;transition:height .9s var(--suave);position:relative}
+.barra-dia.hoje{box-shadow:0 0 16px rgba(212,175,106,.55)}
+.barra-dia .valor{position:absolute;top:-1.4rem;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.6rem;color:var(--tinta-3);white-space:nowrap}
+.dia-rotulo{font-family:var(--mono);font-size:.62rem;color:var(--tinta-3)}
+#constelacao{width:100%;height:215px}
+#constelacao circle{animation:cintilar 3s ease-in-out infinite}
+#constelacao circle:nth-child(odd){animation-delay:1.4s}
+@keyframes cintilar{0%,100%{opacity:1}50%{opacity:.45}}
+.constel-vazia{font-size:.88rem;color:var(--tinta-3);font-style:italic;text-align:center;padding:3rem 1rem}
+
+/* ════════ COMPONENTES GLOBAIS ════════ */
+.modal{position:fixed;inset:0;z-index:150;display:grid;place-items:center;padding:1.2rem;background:rgba(4,6,12,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.modal[hidden]{display:none}
+.modal-caixa{width:min(440px,100%);background:var(--bg-1);border:1px solid var(--borda-forte);border-radius:var(--raio);padding:1.8rem;box-shadow:var(--sombra);animation:surgir .35s var(--suave)}
+@keyframes surgir{from{opacity:0;transform:translateY(18px) scale(.97)}}
+.modal-caixa h4{font-family:var(--serif);font-weight:600;font-size:1.35rem;margin-bottom:.4rem}
+.modal-caixa .modal-sub{color:var(--tinta-2);font-size:.92rem;margin-bottom:1.3rem}
+.modal-caixa label{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-3);display:block;margin:1rem 0 .45rem}
+.erro-campo{color:var(--erro);font-size:.84rem;margin-top:.4rem;min-height:1.2em}
+.cores-opcoes{display:flex;gap:.6rem;flex-wrap:wrap}
+.cor-opcao{position:relative}
+.cor-opcao input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.cor-opcao .bolinha{width:30px;height:30px;border-radius:50%;display:block;border:2px solid transparent;transition:transform .2s,border-color .2s}
+.cor-opcao input:checked + .bolinha{border-color:var(--tinta);transform:scale(1.15)}
+.cor-opcao input:focus-visible + .bolinha{outline:2px solid var(--ouro);outline-offset:2px}
+.modal-acoes{display:flex;justify-content:flex-end;gap:.7rem;margin-top:1.6rem}
+.lista-ajuda{list-style:none;display:flex;flex-direction:column;gap:.7rem;font-size:.93rem;color:var(--tinta-2)}
+.lista-ajuda strong{color:var(--ouro-claro);font-weight:500}
+.tecla{font-family:var(--mono);font-size:.7rem;border:1px solid var(--borda-forte);border-radius:5px;padding:.1rem .45rem;color:var(--tinta)}
+
+#toastZona{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);z-index:160;display:flex;flex-direction:column;gap:.6rem;align-items:center;width:min(430px,calc(100% - 2rem))}
+.toast{display:flex;align-items:center;gap:.9rem;width:100%;background:var(--bg-2);border:1px solid var(--borda-forte);border-radius:var(--raio-p);padding:.85rem 1.1rem;font-size:.92rem;box-shadow:var(--sombra);animation:surgir .35s var(--suave)}
+.toast .t-msg{flex:1}
+.toast .t-acao{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ouro-claro);border-bottom:1px solid var(--ouro);padding-bottom:.1rem}
+.toast.saindo{opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s}
+
+/* ════════ HEURÍSTICAS ════════ */
+.grade-heur{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem}
+.heur{display:flex;gap:1.2rem;padding:1.5rem;border:1px solid var(--borda);border-radius:var(--raio);background:var(--vidro);transition:border-color .4s,background .4s}
+.heur:hover{border-color:var(--borda-forte);background:rgba(212,175,106,.05)}
+.heur .h-num{font-family:var(--mono);font-size:.8rem;color:var(--ouro);letter-spacing:.1em;padding-top:.2rem}
+.heur h3{font-family:var(--serif);font-weight:600;font-size:1.08rem;margin-bottom:.45rem}
+.heur p{color:var(--tinta-2);font-size:.92rem;line-height:1.6}
+.heur p strong{color:var(--tinta);font-weight:500}
+
+/* ════════ PERSONAS & JORNADA ════════ */
+.grade-personas{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem;margin-bottom:3.5rem}
+.persona{padding:1.7rem}
+.p-topo{display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem}
+.p-orbe{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:1.15rem;color:#10131f;flex-shrink:0}
+.p-topo h3{font-family:var(--serif);font-weight:600;font-size:1.15rem}
+.p-papel{font-size:.84rem;color:var(--tinta-3)}
+.p-chips{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1rem}
+.p-chip{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;border:1px solid var(--borda);border-radius:999px;padding:.22rem .6rem;color:var(--tinta-2)}
+.p-bloco{font-size:.89rem;color:var(--tinta-2);margin-bottom:.7rem}
+.p-bloco b{display:block;font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ouro);font-weight:400;margin-bottom:.25rem}
+.tag-secundaria{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-3);border:1px dashed var(--borda-forte);border-radius:999px;padding:.2rem .7rem;margin-left:auto}
+.jornada{display:grid;grid-template-columns:repeat(5,1fr);gap:.9rem;position:relative;padding-top:1.6rem}
+.jornada::before{content:"";position:absolute;top:0;left:4%;right:4%;height:1px;background:linear-gradient(90deg,transparent,var(--borda-forte),transparent)}
+.etapa-j{padding:1.2rem;border:1px solid var(--borda);border-radius:var(--raio);background:var(--vidro);position:relative}
+.etapa-j::before{content:"";position:absolute;top:-1.85rem;left:50%;transform:translateX(-50%);width:9px;height:9px;border-radius:50%;background:var(--ouro);box-shadow:0 0 12px rgba(212,175,106,.8)}
+.etapa-j .emocao{font-size:1.5rem;display:block;margin-bottom:.5rem}
+.etapa-j h4{font-family:var(--serif);font-weight:600;font-size:.98rem;margin-bottom:.35rem}
+.etapa-j p{font-size:.8rem;color:var(--tinta-2);line-height:1.55}
+.etapa-j .oportunidade{margin-top:.55rem;font-size:.74rem;color:var(--ouro-claro);font-style:italic}
+
+/* ════════ MÉTRICAS ════════ */
+.metricas-topo{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:2.2rem}
+.metrica-card{text-align:center;padding:1.6rem 1rem}
+.metrica-card .m-v{font-family:var(--serif);font-weight:600;font-size:2.3rem;color:var(--ouro-claro);line-height:1}
+.metrica-card .m-r{font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-3);display:block;margin-top:.6rem}
+.tarefas-teste{display:flex;flex-direction:column;gap:1rem}
+.linha-teste{display:grid;grid-template-columns:230px 1fr 52px;gap:1rem;align-items:center;font-size:.92rem}
+.trilho{height:9px;border-radius:999px;background:rgba(236,232,219,.08);overflow:hidden}
+.preenchimento{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ouro),var(--ouro-claro));width:0;transition:width 1.3s var(--suave)}
+.linha-teste .pct{font-family:var(--mono);font-size:.78rem;color:var(--ouro-claro);text-align:right}
+.escala-sus{margin-top:2.4rem}
+.sus-trilho{height:11px;border-radius:999px;background:linear-gradient(90deg,#a35454 0 50%,#a3854f 50% 70%,#7d9c68 70% 85%,#8fbf9f 85% 100%);position:relative;opacity:.92}
+.sus-marcador{position:absolute;top:50%;width:19px;height:19px;border-radius:50%;background:var(--tinta);border:3px solid var(--bg-0);transform:translate(-50%,-50%);box-shadow:0 0 14px rgba(236,232,219,.7)}
+.sus-rotulos{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.62rem;color:var(--tinta-3);margin-top:.55rem;letter-spacing:.08em}
+.nota-ilustrativa{margin-top:1.8rem;font-size:.84rem;color:var(--tinta-3);font-style:italic;border-left:2px solid var(--borda-forte);padding-left:1rem}
+
+/* acessibilidade — faixa */
+.faixa-acess{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.item-acess{display:flex;gap:.8rem;align-items:flex-start;font-size:.88rem;color:var(--tinta-2);border:1px solid var(--borda);border-radius:var(--raio-p);padding:1.1rem;background:var(--vidro)}
+.item-acess .ok{color:var(--ok);font-weight:700}
+
+/* ════════ RODAPÉ ════════ */
+footer{border-top:1px solid var(--borda);padding:3.5rem clamp(1.2rem,5vw,3rem) 2.5rem;position:relative;z-index:1}
+.rodape-miolo{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:1.2rem}
+.rodape-linha{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;align-items:center}
+.rodape-miolo p{font-size:.86rem;color:var(--tinta-3)}
+.rodape-miolo .equipe{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;color:var(--tinta-2)}
+
+/* ════════ RESPONSIVO ════════ */
+@media (max-width:1020px){
+  .grade-heur{grid-template-columns:1fr}
+  .jornada{grid-template-columns:repeat(2,1fr)}
+  .jornada::before{display:none}
+  .etapa-j::before{display:none}
+  .materias-grade{grid-template-columns:1fr}
+  .detalhe-materia{position:static}
+}
+@media (max-width:880px){
+  .heroi{grid-template-columns:1fr;text-align:center;padding-top:7rem;gap:3rem}
+  .kicker{justify-content:center}
+  .heroi p.sub{margin:0 auto}
+  .heroi-acoes{justify-content:center}
+  .heroi-ceu{order:-1;margin-top:1rem}
+  .planeta-heroi{width:clamp(190px,46vw,250px)}
+  .nav-elos{position:fixed;inset:0;background:rgba(7,10,20,.96);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);flex-direction:column;justify-content:center;gap:2.2rem;transform:translateY(-100%);transition:transform .45s var(--suave);z-index:-1}
+  .nav-elos.aberto{transform:translateY(0)}
+  .nav-elos a{font-size:1rem}
+  #menuBtn{display:flex;z-index:5}
+  .grade-3,.passos,.grade-personas{grid-template-columns:1fr}
+  .faixa-stats,.grade-stats-app,.metricas-topo,.faixa-acess{grid-template-columns:repeat(2,1fr)}
+  .app{grid-template-columns:1fr;min-height:0}
+  .app-nav{flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--borda);padding:.7rem .8rem;gap:.4rem}
+  .app-nav .titulo-nav,.app-nav .rodape-nav{display:none}
+  .aba{width:auto;white-space:nowrap;padding:.55rem .85rem}
+  .aba .atalho{display:none}
+  .foco-grade{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .foco-controles{width:100%;max-width:420px}
+  .presets,.foco-acoes{justify-content:center}
+  .prog-grade{grid-template-columns:1fr}
+  .linha-teste{grid-template-columns:1fr;gap:.4rem}
+  .linha-teste .pct{text-align:left}
+}
+@media (max-width:560px){
+  .faixa-stats,.grade-stats-app,.metricas-topo,.faixa-acess{grid-template-columns:1fr 1fr}
+  .jornada{grid-template-columns:1fr}
+  .det-acoes,.acoes-rapidas{flex-direction:column;align-items:stretch}
+  .form-linha{flex-direction:column}
+}
+
+/* movimento reduzido — WCAG */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* ════════ WIREFRAMES — baixa fidelidade ════════ */
+.wire-grade{display:grid;grid-template-columns:repeat(2,1fr);gap:1.6rem}
+@media (max-width:880px){.wire-grade{grid-template-columns:1fr}}
+.prancheta{padding:1.4rem}
+.prancheta h3{font-family:var(--serif);font-weight:600;font-size:1.12rem;margin-bottom:.3rem}
+.prancheta .p-sub{font-family:var(--mono);font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-3);display:block;margin-bottom:1rem}
+.wf{background:#d9d6cb;border-radius:10px;padding:12px;color:#3c3a33;font-family:var(--mono);box-shadow:inset 0 0 0 1px #b4b1a5,0 14px 30px rgba(0,0,0,.35);position:relative}
+.wf,.wf *{box-sizing:border-box}
+.wf-linha{display:flex;gap:7px;margin-bottom:7px;align-items:stretch}
+.wf-col{display:flex;flex-direction:column;gap:7px}
+.wf-caixa{background:#ccc9bd;border:1.5px solid #807d72;border-radius:5px;position:relative;min-height:14px}
+.wf-x{background:
+  linear-gradient(to top right,transparent calc(50% - .8px),#807d72 50%,transparent calc(50% + .8px)),
+  linear-gradient(to bottom right,transparent calc(50% - .8px),#807d72 50%,transparent calc(50% + .8px)),#ccc9bd;
+  border:1.5px solid #807d72;border-radius:5px}
+.wf-txt{height:7px;background:#8f8c80;border-radius:3px}
+.wf-txt.curta{width:55%}
+.wf-txt.media{width:78%}
+.wf-btn{border:1.5px solid #56544a;border-radius:5px;background:#bfbcb0;font-size:8.5px;letter-spacing:.06em;text-align:center;padding:5px 7px;color:#33312b;white-space:nowrap}
+.wf-btn.cheio{background:#56544a;color:#e7e4d9}
+.wf-circ{border:1.5px dashed #807d72;border-radius:50%}
+.wf-rotulo{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#6c695e}
+.wf-tag{position:absolute;width:17px;height:17px;border-radius:50%;background:#23201a;color:#ecd29b;font-size:9.5px;display:grid;place-items:center;z-index:2;font-family:var(--mono);box-shadow:0 0 0 2px #d9d6cb}
+.wf-celular{max-width:215px;margin:0 auto}
+.wire-notas{list-style:none;display:flex;flex-direction:column;gap:.45rem;margin-top:1rem;font-size:.84rem;color:var(--tinta-2)}
+.wire-notas .n{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--ouro-fundo);border:1px solid var(--borda-forte);color:var(--ouro-claro);font-family:var(--mono);font-size:.62rem;margin-right:.5rem;flex-shrink:0}
+.wire-notas li{display:flex;align-items:baseline}
+.decisoes{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.6rem}
+@media (max-width:880px){.decisoes{grid-template-columns:1fr}}
+.decisao{padding:1.5rem;border:1px solid var(--borda);border-radius:var(--raio);background:var(--vidro)}
+.decisao .de-para{font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ouro);display:block;margin-bottom:.6rem}
+.decisao p{font-size:.9rem;color:var(--tinta-2)}
+
+</style>
+</head>
+<body>
+<a class="pular" href="#principal">Pular para o conteúdo</a>
+<canvas id="ceu" aria-hidden="true"></canvas>
+<div class="nebulosa neb-b" aria-hidden="true"></div>
+<div id="brilhoCursor" aria-hidden="true"></div>
+<div id="progScroll" aria-hidden="true"></div>
+
+<nav id="navPrincipal" aria-label="Navegação principal">
+  <a class="marca" href="index.html"><span class="marca-orbe" aria-hidden="true"></span>ÓRBITA</a>
+  <button id="menuBtn" aria-expanded="false" aria-controls="navElos" aria-label="Abrir menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-elos" id="navElos">
+    <li><a href="index.html">Início</a></li>
+    <li><a href="index.html#heuristicas">Heurísticas</a></li>
+    <li><a href="index.html#personas">Personas</a></li>
+    <li><a href="index.html#metricas">Métricas</a></li>
+    <li class="elo-cta"><a href="app.html">Abrir sistema</a></li>
+  </ul>
+</nav>
+
+<div id="conteudo">
+<main id="principal">
+
+<section class="secao" style="padding-top:9rem" aria-labelledby="tituloWire">
+  <div class="miolo">
+    <div class="cab-secao revelar">
+      <p class="kicker">Etapa 04 · Protótipo de baixa fidelidade</p>
+      <h2 id="tituloWire">Antes da galáxia, <em>o rascunho</em></h2>
+      <p>Wireframes das seis telas principais na fase de estrutura — sem cor, tipografia ou tema, só hierarquia e fluxo. As anotações numeradas registram as intenções de cada área; ao final, as decisões que mudaram até a <a href="app.html">versão de alta fidelidade</a>.</p>
+    </div>
+
+    <div class="wire-grade">
+
+      <article class="cartao prancheta revelar" style="--atraso:.0s">
+        <h3>Entrada</h3><span class="p-sub">tela 0 · seleção de perfil</span>
+        <div class="wf" style="aspect-ratio:16/11">
+          <span class="wf-tag" style="top:10px;right:10px">1</span>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin:8px 0 16px">
+            <div class="wf-circ" style="width:30px;height:30px"></div>
+            <div class="wf-txt" style="width:92px"></div>
+            <div class="wf-txt" style="width:150px;height:5px"></div>
+          </div>
+          <div class="wf-linha" style="position:relative">
+            <span class="wf-tag" style="top:-9px;left:-7px">2</span>
+            <div class="wf-caixa" style="flex:1;padding:9px;display:flex;flex-direction:column;align-items:center;gap:5px"><div class="wf-circ" style="width:22px;height:22px"></div><div class="wf-txt" style="width:70%"></div><div class="wf-txt" style="width:92%;height:5px"></div><div class="wf-btn cheio" style="width:100%;margin-top:3px">ENTRAR</div></div>
+            <div class="wf-caixa" style="flex:1;padding:9px;display:flex;flex-direction:column;align-items:center;gap:5px"><div class="wf-circ" style="width:22px;height:22px"></div><div class="wf-txt" style="width:70%"></div><div class="wf-txt" style="width:92%;height:5px"></div><div class="wf-btn" style="width:100%;margin-top:3px">ENTRAR</div></div>
+            <div class="wf-caixa" style="flex:1;padding:9px;display:flex;flex-direction:column;align-items:center;gap:5px"><div class="wf-circ" style="width:22px;height:22px"></div><div class="wf-txt" style="width:70%"></div><div class="wf-txt" style="width:92%;height:5px"></div><div class="wf-btn" style="width:100%;margin-top:3px">ENTRAR</div></div>
+            <div class="wf-caixa" style="flex:1;padding:9px;display:flex;flex-direction:column;align-items:center;gap:5px"><div class="wf-circ" style="width:22px;height:22px"></div><div class="wf-txt" style="width:70%"></div><div class="wf-txt" style="width:92%;height:5px"></div><div class="wf-btn" style="width:100%;margin-top:3px">ENTRAR</div></div>
+          </div>
+          <div class="wf-txt" style="width:58%;height:5px;margin:12px auto 0"></div>
+        </div>
+        <ul class="wire-notas">
+          <li><span class="n">1</span>Identidade enxuta no topo — nada compete com a decisão de entrada.</li>
+          <li><span class="n">2</span>Um cartão de perfil por persona, com descrição do cenário carregado.</li>
+        </ul>
+      </article>
+
+      <article class="cartao prancheta revelar" style="--atraso:.08s">
+        <h3>Painel</h3><span class="p-sub">tela 1 · visão geral</span>
+        <div class="wf" style="aspect-ratio:16/11">
+          <div class="wf-linha" style="align-items:center"><div class="wf-txt media" style="height:9px"></div><div style="flex:1"></div><div class="wf-txt" style="width:64px;height:5px"></div></div>
+          <div class="wf-linha" style="position:relative;margin-top:4px">
+            <span class="wf-tag" style="top:-9px;left:-7px">1</span>
+            <div class="wf-caixa" style="flex:1;height:36px;padding:6px"><div class="wf-txt" style="width:40%;height:9px"></div></div>
+            <div class="wf-caixa" style="flex:1;height:36px;padding:6px"><div class="wf-txt" style="width:40%;height:9px"></div></div>
+            <div class="wf-caixa" style="flex:1;height:36px;padding:6px"><div class="wf-txt" style="width:40%;height:9px"></div></div>
+            <div class="wf-caixa" style="flex:1;height:36px;padding:6px"><div class="wf-txt" style="width:40%;height:9px"></div></div>
+          </div>
+          <div class="wf-caixa" style="padding:8px;position:relative;margin-bottom:7px">
+            <span class="wf-tag" style="top:-9px;right:-7px">2</span>
+            <div class="wf-rotulo" style="margin-bottom:6px">PRÓXIMAS TAREFAS</div>
+            <div class="wf-linha" style="align-items:center"><div class="wf-caixa" style="width:11px;height:11px;min-height:0"></div><div class="wf-txt" style="flex:1"></div><div class="wf-caixa" style="width:46px;height:11px;min-height:0;border-radius:8px"></div></div>
+            <div class="wf-linha" style="align-items:center"><div class="wf-caixa" style="width:11px;height:11px;min-height:0"></div><div class="wf-txt" style="flex:1;width:72%"></div><div class="wf-caixa" style="width:46px;height:11px;min-height:0;border-radius:8px"></div></div>
+            <div class="wf-linha" style="align-items:center;margin-bottom:0"><div class="wf-caixa" style="width:11px;height:11px;min-height:0"></div><div class="wf-txt" style="flex:1;width:60%"></div><div class="wf-caixa" style="width:46px;height:11px;min-height:0;border-radius:8px"></div></div>
+          </div>
+          <div class="wf-linha" style="position:relative;margin-bottom:0">
+            <span class="wf-tag" style="top:-9px;left:-7px">3</span>
+            <div class="wf-btn cheio">INICIAR FOCO</div><div class="wf-btn">+ NOVA MATÉRIA</div>
+          </div>
+        </div>
+        <ul class="wire-notas">
+          <li><span class="n">1</span>Quatro indicadores de status logo na chegada (visibilidade — H1).</li>
+          <li><span class="n">2</span>Tarefas com caixa de seleção e chip da matéria de origem.</li>
+          <li><span class="n">3</span>Ações rápidas: o caminho mais curto para o valor do app.</li>
+        </ul>
+      </article>
+
+      <article class="cartao prancheta revelar" style="--atraso:.0s">
+        <h3>Matérias</h3><span class="p-sub">tela 2 · mapa orbital + detalhe</span>
+        <div class="wf" style="aspect-ratio:16/11">
+          <div class="wf-linha" style="height:calc(100% - 0px);margin-bottom:0">
+            <div style="flex:1.15;position:relative;min-height:150px">
+              <span class="wf-tag" style="top:0;left:0">1</span>
+              <div class="wf-circ" style="position:absolute;inset:5%"></div>
+              <div class="wf-circ" style="position:absolute;inset:20%"></div>
+              <div class="wf-circ" style="position:absolute;inset:35%"></div>
+              <div style="position:absolute;left:50%;top:50%;width:15px;height:15px;margin:-7.5px;border-radius:50%;background:#56544a"></div>
+              <div style="position:absolute;left:50%;top:5%;width:13px;height:13px;margin:-6.5px;border-radius:50%;background:#807d72"></div>
+              <div style="position:absolute;left:80%;top:50%;width:11px;height:11px;margin:-5.5px;border-radius:50%;background:#807d72"></div>
+              <div style="position:absolute;left:35%;top:65%;width:10px;height:10px;margin:-5px;border-radius:50%;background:#807d72"></div>
+            </div>
+            <div class="wf-caixa" style="flex:1;padding:8px;position:relative">
+              <span class="wf-tag" style="top:-9px;right:-7px">2</span>
+              <div class="wf-linha" style="align-items:center"><div class="wf-circ" style="width:16px;height:16px;border-style:solid"></div><div class="wf-txt media" style="height:9px"></div></div>
+              <div class="wf-caixa" style="height:8px;min-height:0;border-radius:8px;margin-bottom:7px"><div style="width:55%;height:100%;background:#807d72;border-radius:8px"></div></div>
+              <div class="wf-txt" style="margin-bottom:5px"></div>
+              <div class="wf-txt media" style="margin-bottom:5px"></div>
+              <div class="wf-txt curta" style="margin-bottom:9px"></div>
+              <div class="wf-linha" style="position:relative;margin-bottom:0;align-items:stretch">
+                <span class="wf-tag" style="bottom:-9px;right:-7px;top:auto">3</span>
+                <div class="wf-caixa" style="flex:1;height:18px;min-height:0"></div><div class="wf-btn">+</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ul class="wire-notas">
+          <li><span class="n">1</span>Matérias como corpos em órbitas concêntricas; tamanho = pendências.</li>
+          <li><span class="n">2</span>Painel de detalhe com progresso e lista de tarefas da matéria.</li>
+          <li><span class="n">3</span>Entrada de nova tarefa sempre à vista, sem trocar de tela.</li>
+        </ul>
+      </article>
+
+      <article class="cartao prancheta revelar" style="--atraso:.08s">
+        <h3>Foco</h3><span class="p-sub">tela 3 · pomodoro</span>
+        <div class="wf" style="aspect-ratio:16/11">
+          <div class="wf-linha" style="height:100%;margin-bottom:0;align-items:center">
+            <div style="flex:1;display:grid;place-items:center;position:relative">
+              <span class="wf-tag" style="top:0;left:0">1</span>
+              <div class="wf-circ" style="width:118px;height:118px;border-width:2.5px;display:grid;place-items:center">
+                <div style="text-align:center"><div class="wf-txt" style="width:52px;height:11px;margin:0 auto 5px"></div><div class="wf-txt" style="width:34px;height:5px;margin:0 auto"></div></div>
+              </div>
+            </div>
+            <div style="flex:1" class="wf-col">
+              <div class="wf-rotulo">ESTUDANDO AGORA</div>
+              <div class="wf-caixa" style="height:20px"></div>
+              <div class="wf-rotulo" style="margin-top:4px">DURAÇÃO</div>
+              <div class="wf-linha" style="position:relative;margin-bottom:2px">
+                <span class="wf-tag" style="top:-9px;right:-7px">2</span>
+                <div class="wf-btn">5</div><div class="wf-btn">15</div><div class="wf-btn cheio">25</div><div class="wf-btn">50</div>
+              </div>
+              <div class="wf-linha" style="margin-bottom:0"><div class="wf-btn cheio" style="flex:1">▶ INICIAR</div><div class="wf-btn">ZERAR</div></div>
+            </div>
+          </div>
+        </div>
+        <ul class="wire-notas">
+          <li><span class="n">1</span>Anel-cronômetro como elemento dominante; o tempo é o conteúdo.</li>
+          <li><span class="n">2</span>Presets de duração em vez de campo livre — menos erro, mais ritmo.</li>
+        </ul>
+      </article>
+
+      <article class="cartao prancheta revelar" style="--atraso:.0s">
+        <h3>Progresso</h3><span class="p-sub">tela 4 · evolução</span>
+        <div class="wf" style="aspect-ratio:16/11">
+          <div class="wf-linha" style="height:100%;margin-bottom:0">
+            <div class="wf-caixa" style="flex:1;padding:8px;position:relative;display:flex;flex-direction:column">
+              <span class="wf-tag" style="top:-9px;left:-7px">1</span>
+              <div class="wf-rotulo" style="margin-bottom:6px">FOCO NA SEMANA</div>
+              <div style="flex:1;display:flex;align-items:flex-end;gap:5px">
+                <div style="flex:1;height:55%;background:#8f8c80;border-radius:3px 3px 0 0"></div>
+                <div style="flex:1;height:30%;background:#8f8c80;border-radius:3px 3px 0 0"></div>
+                <div style="flex:1;height:78%;background:#56544a;border-radius:3px 3px 0 0"></div>
+                <div style="flex:1;height:42%;background:#8f8c80;border-radius:3px 3px 0 0"></div>
+                <div style="flex:1;height:60%;background:#8f8c80;border-radius:3px 3px 0 0"></div>
+                <div style="flex:1;height:22%;background:#8f8c80;border-radius:3px 3px 0 0"></div>
+                <div style="flex:1;height:34%;background:#8f8c80;border-radius:3px 3px 0 0"></div>
+              </div>
+            </div>
+            <div class="wf-caixa" style="flex:1;padding:8px;position:relative">
+              <span class="wf-tag" style="top:-9px;right:-7px">2</span>
+              <div class="wf-rotulo" style="margin-bottom:6px">CONSTELAÇÃO</div>
+              <div style="position:relative;height:calc(100% - 18px);border:1.5px dashed #807d72;border-radius:5px">
+                <div style="position:absolute;left:18%;top:30%;width:7px;height:7px;border-radius:50%;background:#56544a"></div>
+                <div style="position:absolute;left:44%;top:58%;width:7px;height:7px;border-radius:50%;background:#56544a"></div>
+                <div style="position:absolute;left:66%;top:26%;width:7px;height:7px;border-radius:50%;background:#56544a"></div>
+                <div style="position:absolute;left:84%;top:62%;width:7px;height:7px;border-radius:50%;background:#56544a"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ul class="wire-notas">
+          <li><span class="n">1</span>Barras por dia, com o dia atual destacado.</li>
+          <li><span class="n">2</span>Cada tarefa concluída vira um ponto — recompensa visual, não numérica.</li>
+        </ul>
+      </article>
+
+      <article class="cartao prancheta revelar" style="--atraso:.08s">
+        <h3>Painel · mobile</h3><span class="p-sub">tela 1 em viewport estreita</span>
+        <div class="wf wf-celular" style="aspect-ratio:9/16">
+          <div class="wf-linha" style="align-items:center"><div class="wf-txt" style="width:54px;height:8px"></div><div style="flex:1"></div><div class="wf-circ" style="width:14px;height:14px"></div></div>
+          <div class="wf-linha" style="position:relative">
+            <span class="wf-tag" style="top:-9px;right:-7px">1</span>
+            <div class="wf-btn" style="flex:1">PAINEL</div><div class="wf-btn" style="flex:1">MAT</div><div class="wf-btn" style="flex:1">FOCO</div><div class="wf-btn" style="flex:1">PROG</div>
+          </div>
+          <div class="wf-linha"><div class="wf-caixa" style="flex:1;height:30px"></div><div class="wf-caixa" style="flex:1;height:30px"></div></div>
+          <div class="wf-linha"><div class="wf-caixa" style="flex:1;height:30px"></div><div class="wf-caixa" style="flex:1;height:30px"></div></div>
+          <div class="wf-caixa" style="padding:7px">
+            <div class="wf-linha" style="align-items:center"><div class="wf-caixa" style="width:10px;height:10px;min-height:0"></div><div class="wf-txt" style="flex:1"></div></div>
+            <div class="wf-linha" style="align-items:center"><div class="wf-caixa" style="width:10px;height:10px;min-height:0"></div><div class="wf-txt" style="flex:1;width:70%"></div></div>
+            <div class="wf-linha" style="align-items:center;margin-bottom:0"><div class="wf-caixa" style="width:10px;height:10px;min-height:0"></div><div class="wf-txt" style="flex:1;width:58%"></div></div>
+          </div>
+          <div class="wf-btn cheio" style="margin-top:7px">INICIAR FOCO</div>
+        </div>
+        <ul class="wire-notas">
+          <li><span class="n">1</span>Em telas estreitas a navegação vira fileira horizontal no topo; o conteúdo empilha em coluna única.</li>
+        </ul>
+      </article>
+
+    </div>
+
+    <div class="cab-secao revelar" style="margin-top:4rem">
+      <p class="kicker">Do rascunho à versão final</p>
+      <h2>O que <em>mudou</em> no caminho</h2>
+    </div>
+    <div class="decisoes">
+      <article class="decisao revelar" style="--atraso:.0s">
+        <span class="de-para">navegação inferior → lateral</span>
+        <p>Nos wireframes, a navegação ficava na base. Na alta fidelidade ela foi para uma barra lateral no desktop (e fileira no topo no mobile), liberando a área vertical das telas para o conteúdo.</p>
+      </article>
+      <article class="decisao revelar" style="--atraso:.1s">
+        <span class="de-para">planetas anônimos → com rótulo</span>
+        <p>No rascunho, os planetas se distinguiam só por cor e tamanho — ambíguo demais. A versão final exibe o nome da matéria junto a cada planeta (reconhecimento em vez de memorização, H6).</p>
+      </article>
+      <article class="decisao revelar" style="--atraso:.2s">
+        <span class="de-para">só confirmar → confirmar + desfazer</span>
+        <p>A exclusão tinha apenas diálogo de confirmação. A versão final soma o <em>Desfazer</em> no aviso pós-ação, cobrindo também o erro percebido tarde demais (controle e liberdade, H3).</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="rodape-miolo">
+    <div class="rodape-linha">
+      <a class="marca" href="index.html"><span class="marca-orbe" aria-hidden="true"></span>ÓRBITA</a>
+      <span class="equipe">Equipe: [Integrante 1] · [Integrante 2] · [Integrante 3] · [Integrante 4]</span>
+    </div>
+    <div class="rodape-linha">
+      <p><a href="index.html">Início</a> · <a href="app.html">Sistema</a></p>
+      <p>Trabalho de Grau 2 — Engenharia de Usabilidade · Prof. Tiago Tomasel · 2026/1 · feito com apoio de IA (Claude, Anthropic), uso citado.</p>
+    </div>
+  </div>
+</footer>
+</div>
+
+<noscript><p style="position:fixed;inset:auto 0 0;background:#1a1408;color:#ecd29b;padding:1rem;text-align:center;z-index:300">Esta página precisa de JavaScript para os efeitos visuais; o conteúdo segue legível.</p></noscript>
+
+<script>
+
+(function(){
+'use strict';
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $  = function(s){ return document.querySelector(s); };
+const $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+/* ════════ CÉU ESTRELADO (canvas) — reage ao mouse e ao scroll ════════ */
+const tela = document.getElementById('ceu');
+const ctx  = tela.getContext('2d');
+let W = 0, H = 0, estrelas = [], cadentes = [], rolagem = window.scrollY || 0;
+const alvoMouse  = {x:0, y:0};
+const mouseSuave = {x:0, y:0};
+
+function dimensionar(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  tela.width = W * dpr; tela.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  criarEstrelas();
+  if (RM) desenharEstatico();
+}
+function criarEstrelas(){
+  const n = Math.min(Math.round(W * H / 4200), 340);
+  estrelas = [];
+  for (let i = 0; i < n; i++){
+    const tipo = Math.random();
+    estrelas.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      raio: Math.random() * 1.3 + .35,
+      prof: .25 + Math.random() * .75,
+      tw: Math.random() * Math.PI * 2,
+      vtw: .004 + Math.random() * .02,
+      cor: tipo < .08 ? '236,210,155' : (tipo < .5 ? '236,232,219' : '152,176,220')
+    });
+  }
+}
+function desenharEstrela(s, x, y, alfa){
+  ctx.beginPath();
+  ctx.fillStyle = 'rgba(' + s.cor + ',' + alfa.toFixed(3) + ')';
+  ctx.arc(x, y, s.raio, 0, 6.2832);
+  ctx.fill();
+}
+function desenharEstatico(){
+  ctx.clearRect(0, 0, W, H);
+  for (const s of estrelas) desenharEstrela(s, s.x, s.y, .55);
+}
+
+let proxCadente = 4000 + Math.random() * 5000;
+function quadro(agora){
+  ctx.clearRect(0, 0, W, H);
+  mouseSuave.x += (alvoMouse.x - mouseSuave.x) * .05;
+  mouseSuave.y += (alvoMouse.y - mouseSuave.y) * .05;
+
+  for (const s of estrelas){
+    s.tw += s.vtw;
+    const alfa = .32 + (Math.sin(s.tw) * .5 + .5) * .45 * s.prof;
+    let x = s.x + mouseSuave.x * s.prof * 28;
+    let y = s.y - rolagem * s.prof * .22;
+    x = ((x % W) + W) % W;
+    y = ((y % H) + H) % H;
+    desenharEstrela(s, x, y, alfa);
+  }
+
+  if (agora > proxCadente){
+    proxCadente = agora + 5000 + Math.random() * 7000;
+    cadentes.push({
+      x: Math.random() * W * .8 + W * .1,
+      y: Math.random() * H * .35,
+      vx: 7 + Math.random() * 5,
+      vy: 2.5 + Math.random() * 2,
+      vida: 1
+    });
+  }
+  for (let i = cadentes.length - 1; i >= 0; i--){
+    const c = cadentes[i];
+    c.x += c.vx; c.y += c.vy; c.vida -= .018;
+    if (c.vida <= 0 || c.x > W + 80){ cadentes.splice(i, 1); continue; }
+    const g = ctx.createLinearGradient(c.x, c.y, c.x - c.vx * 9, c.y - c.vy * 9);
+    g.addColorStop(0, 'rgba(236,210,155,' + (c.vida * .9).toFixed(2) + ')');
+    g.addColorStop(1, 'rgba(236,210,155,0)');
+    ctx.strokeStyle = g; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(c.x, c.y);
+    ctx.lineTo(c.x - c.vx * 9, c.y - c.vy * 9);
+    ctx.stroke();
+  }
+
+  /* parallax das nebulosas e inclinação do planeta do hero */
+  for (let i = 0; i < nebulosas.length; i++){
+    const fator = (i + 1) * 9;
+    nebulosas[i].style.transform =
+      'translate3d(' + (mouseSuave.x * -fator) + 'px,' +
+      (mouseSuave.y * -fator - rolagem * (.04 + i * .03)) + 'px,0)';
+  }
+  if (tilt){
+    tilt.style.transform =
+      'rotateY(' + (mouseSuave.x * 7) + 'deg) rotateX(' + (-mouseSuave.y * 7) + 'deg)';
+  }
+  requestAnimationFrame(quadro);
+}
+
+const nebulosas = $$('.nebulosa');
+const tilt = document.getElementById('tilt3d');
+const brilho = document.getElementById('brilhoCursor');
+
+if (!RM){
+  document.addEventListener('mousemove', function(e){
+    alvoMouse.x = (e.clientX / W - .5) * 2;
+    alvoMouse.y = (e.clientY / H - .5) * 2;
+    brilho.style.left = e.clientX + 'px';
+    brilho.style.top  = e.clientY + 'px';
+    brilho.style.opacity = '1';
+  });
+  document.addEventListener('mouseleave', function(){ brilho.style.opacity = '0'; });
+}
+
+/* ════════ SCROLL: barra de progresso + nav compacta ════════ */
+const progScroll = document.getElementById('progScroll');
+const nav = document.getElementById('navPrincipal');
+function aoRolar(){
+  rolagem = window.scrollY;
+  const alcance = document.documentElement.scrollHeight - window.innerHeight;
+  progScroll.style.setProperty('--prog', alcance > 0 ? (rolagem / alcance).toFixed(4) : 0);
+  nav.classList.toggle('compacta', rolagem > 40);
+}
+window.addEventListener('scroll', aoRolar, {passive: true});
+window.addEventListener('resize', dimensionar);
+
+/* ════════ MENU MOBILE ════════ */
+const menuBtn = document.getElementById('menuBtn');
+const navElos = document.getElementById('navElos');
+if (menuBtn && navElos){
+menuBtn.addEventListener('click', function(){
+  const aberto = navElos.classList.toggle('aberto');
+  menuBtn.setAttribute('aria-expanded', aberto);
+  menuBtn.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
+});
+navElos.addEventListener('click', function(e){
+  if (e.target.tagName === 'A'){
+    navElos.classList.remove('aberto');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+}
+
+/* ════════ REVELAÇÃO NO SCROLL ════════ */
+const observador = new IntersectionObserver(function(entradas){
+  entradas.forEach(function(ent){
+    if (ent.isIntersecting){
+      ent.target.classList.add('visivel');
+      observador.unobserve(ent.target);
+    }
+  });
+}, {threshold: .14, rootMargin: '0px 0px -36px 0px'});
+$$('.revelar, .revelar-esq, .revelar-zoom').forEach(function(el){ observador.observe(el); });
+
+/* ════════ CONTADORES ANIMADOS ════════ */
+function animarContador(el){
+  const alvo = parseInt(el.dataset.alvo, 10) || 0;
+  if (RM){ el.textContent = alvo; return; }
+  const inicio = performance.now(), dur = 1300;
+  function passo(t){
+    const p = Math.min((t - inicio) / dur, 1);
+    el.textContent = Math.round(alvo * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(passo);
+  }
+  requestAnimationFrame(passo);
+}
+const obsContador = new IntersectionObserver(function(entradas){
+  entradas.forEach(function(ent){
+    if (ent.isIntersecting){
+      animarContador(ent.target);
+      obsContador.unobserve(ent.target);
+    }
+  });
+}, {threshold: .6});
+$$('.contador').forEach(function(el){ obsContador.observe(el); });
+
+dimensionar();
+aoRolar();
+if (!RM) requestAnimationFrame(quadro);
+
+
+})();
+</script>
+</body>
+</html>

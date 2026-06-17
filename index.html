@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════════
+  ÓRBITA · Trabalho de Grau 2 — Engenharia de Usabilidade
+  Páginas: index.html (landing) · app.html (sistema) · wireframes.html
+  Hospede a pasta inteira. Para personalizar, procure por:
+    "EQUIPE" (nomes do grupo) e "DADOS_TESTE" (resultados reais dos testes)
+  ═══════════════════════════════════════════════════════════════════
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Órbita — o app que transforma matérias em planetas. Landing do Trabalho G2 de Engenharia de Usabilidade, com a trajetória completa do projeto.">
+<meta name="theme-color" content="#070a14">
+<title>Órbita · Seu universo de estudos</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script>document.documentElement.className += ' js';</script>
+<style>
+
+/* ════════ TOKENS (Heurística 4 — consistência via design system) ════════ */
+:root{
+  --bg-0:#070a14; --bg-1:#0b1020; --bg-2:#111834; --bg-3:#1a2244;
+  --tinta:#ece8db; --tinta-2:#bcb7a6; --tinta-3:#8d8a7e;
+  --ouro:#d4af6a; --ouro-claro:#ecd29b; --ouro-fundo:rgba(212,175,106,.12);
+  --azul:#7fa8d9; --roxo:#9b8cc9; --verde:#8fbf9f; --rosa:#d98fa8; --laranja:#d9a87f;
+  --erro:#e08c8c; --ok:#8fbf9f;
+  --borda:rgba(212,175,106,.16); --borda-forte:rgba(212,175,106,.34);
+  --vidro:rgba(13,19,40,.62);
+  --serif:'Fraunces',Georgia,serif; --texto:'Spectral',Georgia,serif; --mono:'Space Mono',monospace;
+  --raio:16px; --raio-p:10px;
+  --suave:cubic-bezier(.22,.7,.25,1);
+  --sombra:0 18px 50px rgba(0,0,0,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg-0); color:var(--tinta);
+  font-family:var(--texto); font-weight:300; font-size:1.06rem; line-height:1.7;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+body.trava{overflow:hidden}
+img,svg,canvas{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font:inherit}
+a{color:var(--ouro-claro);text-decoration:none}
+::selection{background:rgba(212,175,106,.32);color:#fff}
+:focus-visible{outline:2px solid var(--ouro);outline-offset:3px;border-radius:4px}
+
+/* acessibilidade */
+.pular{position:absolute;left:-999px;top:0;background:var(--ouro);color:#1a1408;padding:.7rem 1.2rem;z-index:200;font-family:var(--mono);font-size:.85rem;border-radius:0 0 8px 0}
+.pular:focus{left:0}
+.so-leitor{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ════════ FUNDO GALÁCTICO ════════ */
+#ceu{position:fixed;inset:0;z-index:0;pointer-events:none}
+.nebulosa{position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0;will-change:transform}
+.neb-a{width:62vw;height:62vw;top:-22vw;right:-18vw;background:radial-gradient(circle,rgba(212,175,106,.13),transparent 65%)}
+.neb-b{width:55vw;height:55vw;top:48vh;left:-22vw;background:radial-gradient(circle,rgba(127,168,217,.12),transparent 65%)}
+.neb-c{width:48vw;height:48vw;top:130vh;right:-14vw;background:radial-gradient(circle,rgba(155,140,201,.11),transparent 65%)}
+#brilhoCursor{position:fixed;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,rgba(236,210,155,.55),transparent 70%);pointer-events:none;z-index:90;transform:translate(-50%,-50%);mix-blend-mode:screen;opacity:0;transition:opacity .4s}
+@media (hover:none){#brilhoCursor{display:none}}
+
+#conteudo{position:relative;z-index:1}
+
+/* barra de progresso do scroll — cauda de cometa */
+#progScroll{position:fixed;top:0;left:0;height:3px;width:100%;z-index:120;transform-origin:left;transform:scaleX(var(--prog,0));background:linear-gradient(90deg,transparent,var(--ouro) 60%,var(--ouro-claro));box-shadow:0 0 12px rgba(212,175,106,.7)}
+
+/* ════════ NAVEGAÇÃO ════════ */
+#navPrincipal{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.1rem clamp(1.2rem,4vw,3rem);transition:padding .4s var(--suave),background .4s,border-color .4s;border-bottom:1px solid transparent}
+#navPrincipal.compacta{padding-top:.6rem;padding-bottom:.6rem;background:rgba(7,10,20,.78);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom-color:var(--borda)}
+.marca{font-family:var(--serif);font-weight:600;font-size:1.35rem;letter-spacing:.16em;color:var(--tinta);display:flex;align-items:center;gap:.55rem}
+.marca-orbe{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 32% 30%,var(--ouro-claro),var(--ouro) 55%,#6e5526);box-shadow:0 0 12px rgba(212,175,106,.8);position:relative}
+.marca-orbe::after{content:"";position:absolute;inset:-5px -9px;border:1px solid rgba(212,175,106,.5);border-radius:50%;transform:rotateX(68deg)}
+.nav-elos{display:flex;gap:2rem;align-items:center;list-style:none}
+.nav-elos a{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta-2);transition:color .3s}
+.nav-elos a:hover{color:var(--ouro-claro)}
+#menuBtn{display:none;flex-direction:column;gap:5px;padding:.5rem}
+#menuBtn span{width:24px;height:2px;background:var(--tinta);transition:transform .3s var(--suave),opacity .3s}
+#menuBtn[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+#menuBtn[aria-expanded="true"] span:nth-child(2){opacity:0}
+#menuBtn[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* ════════ HERO ════════ */
+.heroi{min-height:100svh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:2rem;padding:7.5rem clamp(1.2rem,5vw,5rem) 4rem;max-width:1400px;margin:0 auto;position:relative}
+.kicker{font-family:var(--mono);font-size:.74rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ouro);display:flex;align-items:center;gap:.8rem}
+.kicker::before{content:"";width:34px;height:1px;background:var(--ouro)}
+.heroi h1{font-family:var(--serif);font-weight:300;font-size:clamp(3.4rem,8.5vw,6.4rem);line-height:1.02;letter-spacing:.01em;margin:1.2rem 0 1.4rem}
+.heroi h1 em{font-style:italic;font-weight:600;color:var(--ouro-claro)}
+.heroi p.sub{font-size:clamp(1.02rem,1.5vw,1.2rem);color:var(--tinta-2);max-width:34rem}
+.heroi-acoes{display:flex;gap:1rem;margin-top:2.4rem;flex-wrap:wrap}
+.selo-g2{display:inline-block;margin-top:2.6rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;color:var(--tinta-3);border:1px solid var(--borda);border-radius:999px;padding:.45rem 1rem}
+
+.btn{display:inline-flex;align-items:center;gap:.6rem;font-family:var(--mono);font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;padding:.95rem 1.7rem;border-radius:999px;transition:transform .3s var(--suave),box-shadow .3s,background .3s,color .3s;border:1px solid transparent}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0)}
+.btn-ouro{background:linear-gradient(135deg,var(--ouro-claro),var(--ouro));color:#1d1506;box-shadow:0 8px 28px rgba(212,175,106,.3)}
+.btn-ouro:hover{box-shadow:0 12px 36px rgba(212,175,106,.45)}
+.btn-fantasma{border-color:var(--borda-forte);color:var(--tinta)}
+.btn-fantasma:hover{background:var(--ouro-fundo)}
+
+/* planeta do hero */
+.heroi-ceu{position:relative;display:grid;place-items:center;perspective:900px}
+.flutuar{animation:flutuar 7s ease-in-out infinite}
+@keyframes flutuar{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+#tilt3d{transform-style:preserve-3d;transition:transform .25s ease-out}
+.planeta-heroi{width:clamp(230px,26vw,360px);aspect-ratio:1;border-radius:50%;position:relative;
+  background:radial-gradient(circle at 31% 28%,#f3deae 0%,var(--ouro) 38%,#8a6a33 68%,#3a2c12 100%);
+  box-shadow:inset -26px -22px 60px rgba(0,0,0,.55),0 0 90px rgba(212,175,106,.35)}
+.planeta-heroi::before{content:"";position:absolute;inset:14% 6% auto;height:9%;border-radius:50%;background:rgba(255,255,255,.07);filter:blur(3px);transform:rotate(-8deg)}
+.planeta-heroi::after{content:"";position:absolute;inset:52% 10% auto;height:7%;border-radius:50%;background:rgba(58,44,18,.35);filter:blur(4px);transform:rotate(-6deg)}
+.anel{position:absolute;left:50%;top:50%;width:172%;height:172%;transform:translate(-50%,-50%) rotateX(74deg);border-radius:50%;border:2px solid rgba(236,210,155,.4);box-shadow:0 0 20px rgba(212,175,106,.25)}
+.anel.fino{width:154%;height:154%;border-color:rgba(236,210,155,.18);border-width:1px}
+.lua-orbita{position:absolute;inset:-14%;animation:girar 26s linear infinite}
+.lua-orbita.dois{inset:-30%;animation-duration:44s;animation-direction:reverse}
+.lua{position:absolute;top:50%;left:0;width:22px;height:22px;margin:-11px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#dfe6f2,var(--azul) 55%,#2b3c58);box-shadow:0 0 14px rgba(127,168,217,.7)}
+.lua-orbita.dois .lua{width:14px;height:14px;margin:-7px;background:radial-gradient(circle at 32% 30%,#e6dff2,var(--roxo) 55%,#3a3258)}
+@keyframes girar{to{transform:rotate(360deg)}}
+
+.indicador-rolar{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.6rem;color:var(--tinta-3);font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase}
+.indicador-rolar .fio{width:1px;height:44px;background:linear-gradient(var(--ouro),transparent);position:relative;overflow:hidden}
+.indicador-rolar .fio::after{content:"";position:absolute;top:-8px;left:-2px;width:5px;height:5px;border-radius:50%;background:var(--ouro-claro);animation:cair 2.2s ease-in infinite}
+@keyframes cair{to{transform:translateY(52px)}}
+
+/* ════════ ESTRUTURA DE SEÇÕES ════════ */
+.secao{padding:clamp(4.5rem,9vw,8rem) clamp(1.2rem,5vw,3rem);scroll-margin-top:80px;position:relative}
+.miolo{max-width:1180px;margin:0 auto}
+.cab-secao{max-width:640px;margin-bottom:clamp(2.5rem,5vw,4rem)}
+.cab-secao h2{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,4.4vw,3.2rem);line-height:1.12;margin:1rem 0 1.1rem}
+.cab-secao h2 em{font-style:italic;color:var(--ouro-claro)}
+.cab-secao p{color:var(--tinta-2)}
+.cartao{background:var(--vidro);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--borda);border-radius:var(--raio);padding:1.8rem;transition:border-color .4s,transform .4s var(--suave)}
+.cartao:hover{border-color:var(--borda-forte)}
+
+/* revelação no scroll */
+.js .revelar{opacity:0;transform:translateY(28px);transition:opacity .9s var(--suave),transform .9s var(--suave);transition-delay:var(--atraso,0s)}
+.js .revelar.visivel{opacity:1;transform:none}
+.js .revelar-esq{opacity:0;transform:translateX(-34px);transition:opacity .9s var(--suave),transform .9s var(--suave);transition-delay:var(--atraso,0s)}
+.js .revelar-esq.visivel{opacity:1;transform:none}
+.js .revelar-zoom{opacity:0;transform:scale(.92);transition:opacity .9s var(--suave),transform .9s var(--suave);transition-delay:var(--atraso,0s)}
+.js .revelar-zoom.visivel{opacity:1;transform:none}
+
+/* O PROJETO */
+.grade-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem}
+.cartao .icone{width:46px;height:46px;border-radius:12px;background:var(--ouro-fundo);border:1px solid var(--borda);display:grid;place-items:center;font-size:1.3rem;margin-bottom:1.1rem}
+.cartao h3{font-family:var(--serif);font-weight:600;font-size:1.22rem;margin-bottom:.55rem}
+.cartao p{color:var(--tinta-2);font-size:.97rem}
+.faixa-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:3.2rem;border-top:1px solid var(--borda);border-bottom:1px solid var(--borda);padding:2rem 0}
+.stat{text-align:center}
+.stat .num{font-family:var(--serif);font-weight:600;font-size:clamp(2rem,4vw,2.9rem);color:var(--ouro-claro);line-height:1}
+.stat .rotulo{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-3);margin-top:.6rem;display:block}
+
+/* COMO FUNCIONA */
+.passos{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem;counter-reset:passo;position:relative}
+.passo{position:relative;padding:2rem 1.6rem;border:1px solid var(--borda);border-radius:var(--raio);background:var(--vidro)}
+.passo::before{counter-increment:passo;content:"0" counter(passo);font-family:var(--mono);font-size:.78rem;letter-spacing:.2em;color:var(--ouro);display:block;margin-bottom:1rem}
+.passo h3{font-family:var(--serif);font-weight:600;font-size:1.3rem;margin-bottom:.6rem}
+.passo p{color:var(--tinta-2);font-size:.96rem}
+.linha-orbital{position:absolute;top:-34px;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,var(--borda-forte),transparent)}
+
+
+/* ════════ PROTÓTIPO — MOLDURA DO APP ════════ */
+.app-moldura{border:1px solid var(--borda-forte);border-radius:22px;overflow:hidden;box-shadow:var(--sombra);background:rgba(9,13,28,.85);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.app-barra-janela{display:flex;align-items:center;gap:.9rem;padding:.8rem 1.2rem;border-bottom:1px solid var(--borda);background:rgba(7,10,20,.6)}
+.pontos{display:flex;gap:.45rem}
+.pontos span{width:11px;height:11px;border-radius:50%;background:var(--bg-3);border:1px solid var(--borda)}
+.url-falsa{flex:1;text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--tinta-3);letter-spacing:.08em}
+.app{display:grid;grid-template-columns:218px 1fr;min-height:620px}
+
+/* navegação interna do app (H6 — reconhecimento: sempre visível) */
+.app-nav{border-right:1px solid var(--borda);padding:1.4rem .9rem;display:flex;flex-direction:column;gap:.35rem;background:rgba(7,10,20,.4)}
+.app-nav .titulo-nav{font-family:var(--mono);font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:var(--tinta-3);padding:0 .8rem .8rem}
+.aba{display:flex;align-items:center;gap:.7rem;width:100%;text-align:left;padding:.72rem .9rem;border-radius:var(--raio-p);font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;color:var(--tinta-2);transition:background .25s,color .25s}
+.aba:hover{background:rgba(212,175,106,.08);color:var(--tinta)}
+.aba[aria-selected="true"]{background:var(--ouro-fundo);color:var(--ouro-claro);border:1px solid var(--borda)}
+.aba .atalho{margin-left:auto;font-size:.62rem;color:var(--tinta-3);border:1px solid var(--borda);border-radius:5px;padding:.06rem .4rem}
+.app-nav .rodape-nav{margin-top:auto;padding:.8rem}
+.btn-ajuda{width:100%;justify-content:center}
+
+.app-telas{padding:clamp(1.2rem,3vw,2.2rem);min-width:0}
+.tela[hidden]{display:none}
+.tela-cab{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:1.6rem;flex-wrap:wrap}
+.tela-cab h3{font-family:var(--serif);font-weight:600;font-size:1.5rem}
+.tela-cab .data{font-family:var(--mono);font-size:.72rem;color:var(--tinta-3);letter-spacing:.1em}
+
+/* dica de primeiro uso (H10) */
+.dica-inicial{display:flex;gap:.8rem;align-items:center;background:var(--ouro-fundo);border:1px solid var(--borda);border-radius:var(--raio-p);padding:.8rem 1rem;font-size:.92rem;color:var(--tinta-2);margin-bottom:1.4rem}
+.dica-inicial button{margin-left:auto;color:var(--tinta-3);font-size:1.1rem;line-height:1;padding:.2rem .4rem}
+.dica-inicial button:hover{color:var(--tinta)}
+
+/* PAINEL */
+.grade-stats-app{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;margin-bottom:1.6rem}
+.stat-app{border:1px solid var(--borda);border-radius:var(--raio-p);padding:1rem;background:rgba(13,19,40,.5)}
+.stat-app .v{font-family:var(--serif);font-weight:600;font-size:1.7rem;color:var(--ouro-claro);line-height:1.1}
+.stat-app .r{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-3);display:block;margin-top:.35rem}
+.bloco-app{border:1px solid var(--borda);border-radius:var(--raio);padding:1.3rem;background:rgba(13,19,40,.5);margin-bottom:1.2rem}
+.bloco-app h4{font-family:var(--serif);font-weight:600;font-size:1.08rem;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.acoes-rapidas{display:flex;gap:.8rem;flex-wrap:wrap}
+
+/* listas de tarefas (H1 — status; H3 — desfazer) */
+.lista-tarefas{list-style:none;display:flex;flex-direction:column;gap:.55rem}
+.item-tarefa{display:flex;align-items:center;gap:.8rem;padding:.65rem .8rem;border:1px solid var(--borda);border-radius:var(--raio-p);background:rgba(7,10,20,.35);transition:border-color .3s}
+.item-tarefa:hover{border-color:var(--borda-forte)}
+.item-tarefa.feita .t-titulo{text-decoration:line-through;color:var(--tinta-3)}
+.t-titulo{flex:1;font-size:.95rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip-materia{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;padding:.18rem .55rem;border-radius:999px;border:1px solid var(--borda);color:var(--tinta-2);white-space:nowrap}
+.caixa{appearance:none;-webkit-appearance:none;width:21px;height:21px;border:1.5px solid var(--borda-forte);border-radius:7px;cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:background .25s,border-color .25s;background:transparent}
+.caixa:checked{background:var(--ouro);border-color:var(--ouro)}
+.caixa:checked::after{content:"✓";color:#1d1506;font-size:.78rem;font-weight:700}
+.t-excluir{color:var(--tinta-3);font-size:1rem;padding:.2rem .45rem;border-radius:6px;opacity:.55;transition:opacity .2s,color .2s}
+.item-tarefa:hover .t-excluir,.t-excluir:focus-visible{opacity:1}
+.t-excluir:hover{color:var(--erro)}
+.vazio{border:1px dashed var(--borda-forte);border-radius:var(--raio-p);padding:1.6rem;text-align:center;color:var(--tinta-3);font-size:.93rem}
+.vazio strong{color:var(--tinta-2);display:block;font-family:var(--serif);font-size:1.05rem;margin-bottom:.3rem}
+
+/* MATÉRIAS — sistema solar (elemento-assinatura) */
+.materias-grade{display:grid;grid-template-columns:1.15fr .85fr;gap:1.4rem;align-items:start}
+.sistema{position:relative;aspect-ratio:1/1;max-width:560px;margin:0 auto;width:100%}
+.sol{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff3d4,var(--ouro-claro) 40%,var(--ouro) 70%,#7a5c26);box-shadow:0 0 46px rgba(212,175,106,.85),0 0 110px rgba(212,175,106,.35);animation:pulsar 4.5s ease-in-out infinite;z-index:2}
+@keyframes pulsar{0%,100%{box-shadow:0 0 46px rgba(212,175,106,.85),0 0 110px rgba(212,175,106,.35)}50%{box-shadow:0 0 60px rgba(212,175,106,1),0 0 150px rgba(212,175,106,.5)}}
+.sol .sol-rotulo{position:absolute;top:110%;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;color:var(--tinta-3);white-space:nowrap}
+.orbita{position:absolute;border:1px dashed rgba(212,175,106,.22);border-radius:50%;animation:girar linear infinite}
+.sistema:hover .orbita,.sistema:hover .contra-giro{animation-play-state:paused}
+.orb-1{inset:31%;animation-duration:42s}
+.orb-2{inset:21%;animation-duration:58s}
+.orb-3{inset:11%;animation-duration:76s}
+.orb-4{inset:1%;animation-duration:96s}
+.planeta{position:absolute;top:0;left:50%;transform:translate(-50%,-50%)}
+.contra-giro{animation:girar linear infinite reverse;display:block}
+.orb-1 .contra-giro{animation-duration:42s}
+.orb-2 .contra-giro{animation-duration:58s}
+.orb-3 .contra-giro{animation-duration:76s}
+.orb-4 .contra-giro{animation-duration:96s}
+.esfera{border-radius:50%;position:relative;display:grid;place-items:center;transition:transform .35s var(--suave),box-shadow .35s;cursor:pointer}
+.esfera:hover{transform:scale(1.12)}
+.esfera.ativa{box-shadow:0 0 0 3px var(--bg-0),0 0 0 5px var(--ouro)!important}
+.esfera.com-anel::before{content:"";position:absolute;left:50%;top:50%;width:158%;height:158%;transform:translate(-50%,-50%) rotateX(72deg);border-radius:50%;border:1.5px solid rgba(236,232,219,.4)}
+.esfera .nome-planeta{position:absolute;top:106%;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;color:var(--tinta-2);white-space:nowrap;background:rgba(7,10,20,.7);padding:.14rem .5rem;border-radius:999px;border:1px solid var(--borda);pointer-events:none}
+.legenda-sistema{text-align:center;font-size:.85rem;color:var(--tinta-3);margin-top:1rem;font-style:italic}
+
+/* painel de detalhe da matéria */
+.detalhe-materia{border:1px solid var(--borda);border-radius:var(--raio);background:rgba(13,19,40,.55);padding:1.4rem;position:sticky;top:90px}
+.det-cab{display:flex;align-items:center;gap:.9rem;margin-bottom:1.1rem}
+.det-orbe{width:40px;height:40px;border-radius:50%;flex-shrink:0}
+.det-cab h4{font-family:var(--serif);font-weight:600;font-size:1.2rem;flex:1;min-width:0}
+.det-meta{display:flex;gap:1.4rem;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--tinta-3);text-transform:uppercase;margin-bottom:1rem;flex-wrap:wrap}
+.det-meta strong{color:var(--ouro-claro);font-weight:400}
+.barra-prog{height:7px;border-radius:999px;background:rgba(236,232,219,.1);overflow:hidden;margin-bottom:1.3rem}
+.barra-prog .preench{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ouro),var(--ouro-claro));transition:width .7s var(--suave)}
+.form-linha{display:flex;gap:.6rem;margin-top:1rem}
+.campo{flex:1;background:rgba(7,10,20,.55);border:1px solid var(--borda);border-radius:var(--raio-p);padding:.65rem .9rem;color:var(--tinta);font-size:.92rem;min-width:0}
+.campo::placeholder{color:var(--tinta-3)}
+.campo:focus{outline:2px solid var(--ouro);outline-offset:1px;border-color:transparent}
+.btn-mini{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;padding:.62rem 1.05rem;border-radius:var(--raio-p);background:var(--ouro);color:#1d1506;transition:transform .25s,box-shadow .25s;white-space:nowrap}
+.btn-mini:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(212,175,106,.35)}
+.btn-mini.contorno{background:transparent;border:1px solid var(--borda-forte);color:var(--tinta-2)}
+.btn-mini.contorno:hover{background:var(--ouro-fundo);color:var(--tinta)}
+.btn-mini.perigo{background:transparent;border:1px solid rgba(224,140,140,.4);color:var(--erro)}
+.btn-mini.perigo:hover{background:rgba(224,140,140,.1)}
+.det-acoes{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+
+/* FOCO — pomodoro */
+.foco-grade{display:grid;grid-template-columns:auto 1fr;gap:clamp(1.5rem,4vw,3rem);align-items:center}
+.anel-wrap{position:relative;width:clamp(220px,30vw,280px);aspect-ratio:1}
+.anel-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.anel-fundo{fill:none;stroke:rgba(236,232,219,.09);stroke-width:7}
+.anel-prog{fill:none;stroke:url(#gradAnel);stroke-width:7;stroke-linecap:round;stroke-dasharray:703.7;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear}
+.anel-centro{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.tempo{font-family:var(--serif);font-weight:300;font-size:clamp(2.6rem,6vw,3.6rem);letter-spacing:.04em;line-height:1}
+.fase{font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--ouro);margin-top:.5rem}
+.foco-controles label{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-3);display:block;margin:1.1rem 0 .5rem}
+.presets{display:flex;gap:.5rem;flex-wrap:wrap}
+.preset{font-family:var(--mono);font-size:.72rem;padding:.45rem .85rem;border:1px solid var(--borda);border-radius:999px;color:var(--tinta-2);transition:all .25s}
+.preset:hover{border-color:var(--borda-forte);color:var(--tinta)}
+.preset[aria-pressed="true"]{background:var(--ouro-fundo);border-color:var(--ouro);color:var(--ouro-claro)}
+.foco-acoes{display:flex;gap:.8rem;margin-top:1.6rem;flex-wrap:wrap}
+.sessoes-info{font-size:.9rem;color:var(--tinta-3);margin-top:1.2rem}
+.sessoes-info strong{color:var(--ouro-claro);font-weight:500}
+
+/* PROGRESSO */
+.prog-grade{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem}
+.grafico{display:flex;align-items:flex-end;gap:.7rem;height:190px;padding-top:.5rem}
+.coluna-dia{flex:1;display:flex;flex-direction:column;align-items:center;gap:.5rem;height:100%;justify-content:flex-end}
+.barra-dia{width:100%;max-width:38px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--ouro-claro),var(--ouro) 60%,rgba(212,175,106,.4));min-height:4px;transition:height .9s var(--suave);position:relative}
+.barra-dia.hoje{box-shadow:0 0 16px rgba(212,175,106,.55)}
+.barra-dia .valor{position:absolute;top:-1.4rem;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.6rem;color:var(--tinta-3);white-space:nowrap}
+.dia-rotulo{font-family:var(--mono);font-size:.62rem;color:var(--tinta-3)}
+#constelacao{width:100%;height:215px}
+#constelacao circle{animation:cintilar 3s ease-in-out infinite}
+#constelacao circle:nth-child(odd){animation-delay:1.4s}
+@keyframes cintilar{0%,100%{opacity:1}50%{opacity:.45}}
+.constel-vazia{font-size:.88rem;color:var(--tinta-3);font-style:italic;text-align:center;padding:3rem 1rem}
+
+/* ════════ COMPONENTES GLOBAIS ════════ */
+.modal{position:fixed;inset:0;z-index:150;display:grid;place-items:center;padding:1.2rem;background:rgba(4,6,12,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.modal[hidden]{display:none}
+.modal-caixa{width:min(440px,100%);background:var(--bg-1);border:1px solid var(--borda-forte);border-radius:var(--raio);padding:1.8rem;box-shadow:var(--sombra);animation:surgir .35s var(--suave)}
+@keyframes surgir{from{opacity:0;transform:translateY(18px) scale(.97)}}
+.modal-caixa h4{font-family:var(--serif);font-weight:600;font-size:1.35rem;margin-bottom:.4rem}
+.modal-caixa .modal-sub{color:var(--tinta-2);font-size:.92rem;margin-bottom:1.3rem}
+.modal-caixa label{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-3);display:block;margin:1rem 0 .45rem}
+.erro-campo{color:var(--erro);font-size:.84rem;margin-top:.4rem;min-height:1.2em}
+.cores-opcoes{display:flex;gap:.6rem;flex-wrap:wrap}
+.cor-opcao{position:relative}
+.cor-opcao input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.cor-opcao .bolinha{width:30px;height:30px;border-radius:50%;display:block;border:2px solid transparent;transition:transform .2s,border-color .2s}
+.cor-opcao input:checked + .bolinha{border-color:var(--tinta);transform:scale(1.15)}
+.cor-opcao input:focus-visible + .bolinha{outline:2px solid var(--ouro);outline-offset:2px}
+.modal-acoes{display:flex;justify-content:flex-end;gap:.7rem;margin-top:1.6rem}
+.lista-ajuda{list-style:none;display:flex;flex-direction:column;gap:.7rem;font-size:.93rem;color:var(--tinta-2)}
+.lista-ajuda strong{color:var(--ouro-claro);font-weight:500}
+.tecla{font-family:var(--mono);font-size:.7rem;border:1px solid var(--borda-forte);border-radius:5px;padding:.1rem .45rem;color:var(--tinta)}
+
+#toastZona{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);z-index:160;display:flex;flex-direction:column;gap:.6rem;align-items:center;width:min(430px,calc(100% - 2rem))}
+.toast{display:flex;align-items:center;gap:.9rem;width:100%;background:var(--bg-2);border:1px solid var(--borda-forte);border-radius:var(--raio-p);padding:.85rem 1.1rem;font-size:.92rem;box-shadow:var(--sombra);animation:surgir .35s var(--suave)}
+.toast .t-msg{flex:1}
+.toast .t-acao{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ouro-claro);border-bottom:1px solid var(--ouro);padding-bottom:.1rem}
+.toast.saindo{opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s}
+
+/* ════════ HEURÍSTICAS ════════ */
+.grade-heur{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem}
+.heur{display:flex;gap:1.2rem;padding:1.5rem;border:1px solid var(--borda);border-radius:var(--raio);background:var(--vidro);transition:border-color .4s,background .4s}
+.heur:hover{border-color:var(--borda-forte);background:rgba(212,175,106,.05)}
+.heur .h-num{font-family:var(--mono);font-size:.8rem;color:var(--ouro);letter-spacing:.1em;padding-top:.2rem}
+.heur h3{font-family:var(--serif);font-weight:600;font-size:1.08rem;margin-bottom:.45rem}
+.heur p{color:var(--tinta-2);font-size:.92rem;line-height:1.6}
+.heur p strong{color:var(--tinta);font-weight:500}
+
+/* ════════ PERSONAS & JORNADA ════════ */
+.grade-personas{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem;margin-bottom:3.5rem}
+.persona{padding:1.7rem}
+.p-topo{display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem}
+.p-orbe{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:1.15rem;color:#10131f;flex-shrink:0}
+.p-topo h3{font-family:var(--serif);font-weight:600;font-size:1.15rem}
+.p-papel{font-size:.84rem;color:var(--tinta-3)}
+.p-chips{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1rem}
+.p-chip{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;border:1px solid var(--borda);border-radius:999px;padding:.22rem .6rem;color:var(--tinta-2)}
+.p-bloco{font-size:.89rem;color:var(--tinta-2);margin-bottom:.7rem}
+.p-bloco b{display:block;font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ouro);font-weight:400;margin-bottom:.25rem}
+.tag-secundaria{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-3);border:1px dashed var(--borda-forte);border-radius:999px;padding:.2rem .7rem;margin-left:auto}
+.jornada{display:grid;grid-template-columns:repeat(5,1fr);gap:.9rem;position:relative;padding-top:1.6rem}
+.jornada::before{content:"";position:absolute;top:0;left:4%;right:4%;height:1px;background:linear-gradient(90deg,transparent,var(--borda-forte),transparent)}
+.etapa-j{padding:1.2rem;border:1px solid var(--borda);border-radius:var(--raio);background:var(--vidro);position:relative}
+.etapa-j::before{content:"";position:absolute;top:-1.85rem;left:50%;transform:translateX(-50%);width:9px;height:9px;border-radius:50%;background:var(--ouro);box-shadow:0 0 12px rgba(212,175,106,.8)}
+.etapa-j .emocao{font-size:1.5rem;display:block;margin-bottom:.5rem}
+.etapa-j h4{font-family:var(--serif);font-weight:600;font-size:.98rem;margin-bottom:.35rem}
+.etapa-j p{font-size:.8rem;color:var(--tinta-2);line-height:1.55}
+.etapa-j .oportunidade{margin-top:.55rem;font-size:.74rem;color:var(--ouro-claro);font-style:italic}
+
+/* ════════ MÉTRICAS ════════ */
+.metricas-topo{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:2.2rem}
+.metrica-card{text-align:center;padding:1.6rem 1rem}
+.metrica-card .m-v{font-family:var(--serif);font-weight:600;font-size:2.3rem;color:var(--ouro-claro);line-height:1}
+.metrica-card .m-r{font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-3);display:block;margin-top:.6rem}
+.tarefas-teste{display:flex;flex-direction:column;gap:1rem}
+.linha-teste{display:grid;grid-template-columns:230px 1fr 52px;gap:1rem;align-items:center;font-size:.92rem}
+.trilho{height:9px;border-radius:999px;background:rgba(236,232,219,.08);overflow:hidden}
+.preenchimento{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ouro),var(--ouro-claro));width:0;transition:width 1.3s var(--suave)}
+.linha-teste .pct{font-family:var(--mono);font-size:.78rem;color:var(--ouro-claro);text-align:right}
+.escala-sus{margin-top:2.4rem}
+.sus-trilho{height:11px;border-radius:999px;background:linear-gradient(90deg,#a35454 0 50%,#a3854f 50% 70%,#7d9c68 70% 85%,#8fbf9f 85% 100%);position:relative;opacity:.92}
+.sus-marcador{position:absolute;top:50%;width:19px;height:19px;border-radius:50%;background:var(--tinta);border:3px solid var(--bg-0);transform:translate(-50%,-50%);box-shadow:0 0 14px rgba(236,232,219,.7)}
+.sus-rotulos{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.62rem;color:var(--tinta-3);margin-top:.55rem;letter-spacing:.08em}
+.nota-ilustrativa{margin-top:1.8rem;font-size:.84rem;color:var(--tinta-3);font-style:italic;border-left:2px solid var(--borda-forte);padding-left:1rem}
+
+/* acessibilidade — faixa */
+.faixa-acess{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.item-acess{display:flex;gap:.8rem;align-items:flex-start;font-size:.88rem;color:var(--tinta-2);border:1px solid var(--borda);border-radius:var(--raio-p);padding:1.1rem;background:var(--vidro)}
+.item-acess .ok{color:var(--ok);font-weight:700}
+
+/* ════════ RODAPÉ ════════ */
+footer{border-top:1px solid var(--borda);padding:3.5rem clamp(1.2rem,5vw,3rem) 2.5rem;position:relative;z-index:1}
+.rodape-miolo{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:1.2rem}
+.rodape-linha{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;align-items:center}
+.rodape-miolo p{font-size:.86rem;color:var(--tinta-3)}
+.rodape-miolo .equipe{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;color:var(--tinta-2)}
+
+/* ════════ RESPONSIVO ════════ */
+@media (max-width:1020px){
+  .grade-heur{grid-template-columns:1fr}
+  .jornada{grid-template-columns:repeat(2,1fr)}
+  .jornada::before{display:none}
+  .etapa-j::before{display:none}
+  .materias-grade{grid-template-columns:1fr}
+  .detalhe-materia{position:static}
+}
+@media (max-width:880px){
+  .heroi{grid-template-columns:1fr;text-align:center;padding-top:7rem;gap:3rem}
+  .kicker{justify-content:center}
+  .heroi p.sub{margin:0 auto}
+  .heroi-acoes{justify-content:center}
+  .heroi-ceu{order:-1;margin-top:1rem}
+  .planeta-heroi{width:clamp(190px,46vw,250px)}
+  .nav-elos{position:fixed;inset:0;background:rgba(7,10,20,.96);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);flex-direction:column;justify-content:center;gap:2.2rem;transform:translateY(-100%);transition:transform .45s var(--suave);z-index:-1}
+  .nav-elos.aberto{transform:translateY(0)}
+  .nav-elos a{font-size:1rem}
+  #menuBtn{display:flex;z-index:5}
+  .grade-3,.passos,.grade-personas{grid-template-columns:1fr}
+  .faixa-stats,.grade-stats-app,.metricas-topo,.faixa-acess{grid-template-columns:repeat(2,1fr)}
+  .app{grid-template-columns:1fr;min-height:0}
+  .app-nav{flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--borda);padding:.7rem .8rem;gap:.4rem}
+  .app-nav .titulo-nav,.app-nav .rodape-nav{display:none}
+  .aba{width:auto;white-space:nowrap;padding:.55rem .85rem}
+  .aba .atalho{display:none}
+  .foco-grade{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .foco-controles{width:100%;max-width:420px}
+  .presets,.foco-acoes{justify-content:center}
+  .prog-grade{grid-template-columns:1fr}
+  .linha-teste{grid-template-columns:1fr;gap:.4rem}
+  .linha-teste .pct{text-align:left}
+}
+@media (max-width:560px){
+  .faixa-stats,.grade-stats-app,.metricas-topo,.faixa-acess{grid-template-columns:1fr 1fr}
+  .jornada{grid-template-columns:1fr}
+  .det-acoes,.acoes-rapidas{flex-direction:column;align-items:stretch}
+  .form-linha{flex-direction:column}
+}
+
+/* movimento reduzido — WCAG */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* ════════ TRAÇO ORBITAL — linha que se desenha com o scroll ════════ */
+#conteudo{isolation:isolate}
+#tracoWrap{position:absolute;inset:0;z-index:-1;pointer-events:none}
+#tracoWrap svg{position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible}
+#tracoBase{fill:none;stroke:rgba(212,175,106,.12);stroke-width:2;stroke-dasharray:1 8;stroke-linecap:round}
+#tracoVivo{fill:none;stroke:#d4af6a;stroke-width:2.4;stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(212,175,106,.85))}
+#cometa{position:absolute;top:0;left:0;width:11px;height:11px;margin:-5.5px;border-radius:50%;background:#ffeec6;box-shadow:0 0 16px 5px rgba(236,210,155,.9),0 0 46px 14px rgba(212,175,106,.35);will-change:transform}
+.no-etapa{display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--tinta-3);transition:color .5s}
+.no-bola{width:14px;height:14px;border-radius:50%;border:2px solid var(--ouro);background:transparent;flex-shrink:0;transition:background .5s,box-shadow .5s}
+.no-etapa.aceso{color:var(--ouro-claro)}
+.no-etapa.aceso .no-bola{background:var(--ouro);box-shadow:0 0 16px rgba(212,175,106,.95)}
+.no-final{justify-content:center;margin:0 0 2.4rem;font-size:.72rem}
+.elo-cta a{border:1px solid var(--ouro);border-radius:999px;padding:.5rem 1.1rem;color:var(--ouro-claro)!important}
+.elo-cta a:hover{background:var(--ouro-fundo)}
+.cartao-cta{display:flex;flex-direction:column;gap:.9rem;padding:2.2rem}
+.cartao-cta .icone-g{font-size:2rem}
+.cartao-cta h3{font-family:var(--serif);font-weight:600;font-size:1.45rem}
+.cartao-cta p{color:var(--tinta-2)}
+.cartao-cta .btn{align-self:flex-start;margin-top:.4rem}
+.grade-2{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem}
+@media (max-width:880px){.grade-2{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<a class="pular" href="#principal">Pular para o conteúdo</a>
+<canvas id="ceu" aria-hidden="true"></canvas>
+<div class="nebulosa neb-a" aria-hidden="true"></div>
+<div class="nebulosa neb-b" aria-hidden="true"></div>
+<div class="nebulosa neb-c" aria-hidden="true"></div>
+<div id="brilhoCursor" aria-hidden="true"></div>
+<div id="progScroll" aria-hidden="true"></div>
+
+<nav id="navPrincipal" aria-label="Navegação principal">
+  <a class="marca" href="#topo"><span class="marca-orbe" aria-hidden="true"></span>ÓRBITA</a>
+  <button id="menuBtn" aria-expanded="false" aria-controls="navElos" aria-label="Abrir menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-elos" id="navElos">
+    <li><a href="#projeto">O projeto</a></li>
+    <li><a href="#heuristicas">Heurísticas</a></li>
+    <li><a href="#personas">Personas</a></li>
+    <li><a href="#prototipos">Protótipos</a></li>
+    <li><a href="#metricas">Métricas</a></li>
+    <li class="elo-cta"><a href="app.html">Abrir sistema</a></li>
+  </ul>
+</nav>
+
+<div id="conteudo">
+<div id="tracoWrap" aria-hidden="true">
+  <svg id="tracoSvg" xmlns="http://www.w3.org/2000/svg">
+    <path id="tracoBase" d=""></path>
+    <path id="tracoVivo" d=""></path>
+  </svg>
+  <div id="cometa"></div>
+</div>
+
+<header class="heroi" id="topo">
+  <div>
+    <p class="kicker">Seu universo de estudos</p>
+    <h1>Cada matéria,<br>um <em>planeta</em> em órbita.</h1>
+    <p class="sub">O Órbita transforma a rotina acadêmica em um sistema solar: matérias viram planetas, sessões de foco viram órbitas e cada tarefa concluída acende uma estrela. Role para percorrer a trajetória completa do projeto — o traço dourado conclui cada etapa com você.</p>
+    <div class="heroi-acoes">
+      <a class="btn btn-ouro" href="app.html">Entrar no sistema 🛰️</a>
+      <a class="btn btn-fantasma" href="wireframes.html">Ver wireframes</a>
+    </div>
+    <span class="selo-g2">Trabalho G2 · Engenharia de Usabilidade · landing + sistema + wireframes</span>
+  </div>
+  <div class="heroi-ceu" aria-hidden="true">
+    <div class="flutuar">
+      <div id="tilt3d">
+        <div class="planeta-heroi">
+          <span class="anel"></span>
+          <span class="anel fino"></span>
+          <span class="lua-orbita"><span class="lua"></span></span>
+          <span class="lua-orbita dois"><span class="lua"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="indicador-rolar" aria-hidden="true"><span>deslize</span><span class="fio"></span></div>
+</header>
+
+<main id="principal">
+
+<section class="secao" id="projeto" aria-labelledby="tituloProjeto">
+  <div class="miolo">
+    <div class="no-etapa"><span class="no-bola"></span><span>Etapa 01 · Definição do projeto</span></div>
+    <div class="cab-secao revelar">
+      <h2 id="tituloProjeto">Um problema real, resolvido com uma <em>metáfora viva</em></h2>
+      <p>Estudantes que trabalham ou estudam à noite acumulam matérias, prazos e cansaço — e perdem a noção do próprio progresso. O Órbita responde a isso com organização visual, sessões de foco curtas e feedback constante.</p>
+    </div>
+    <div class="grade-3">
+      <article class="cartao revelar" style="--atraso:.05s">
+        <div class="icone" aria-hidden="true">🌑</div>
+        <h3>O problema</h3>
+        <p>Apps de produtividade genéricos não falam a língua do estudante: são listas frias, sem senso de evolução, que acabam abandonadas na segunda semana de aula.</p>
+      </article>
+      <article class="cartao revelar" style="--atraso:.15s">
+        <div class="icone" aria-hidden="true">🪐</div>
+        <h3>A solução</h3>
+        <p>Um organizador acadêmico em que cada matéria é um planeta com tamanho e órbita próprios. Estudar move o sistema; concluir tarefas forma constelações.</p>
+      </article>
+      <article class="cartao revelar" style="--atraso:.25s">
+        <div class="icone" aria-hidden="true">🔭</div>
+        <h3>Público-alvo</h3>
+        <p>Universitários de cursos noturnos e estudantes que conciliam trabalho e graduação — pessoas com pouco tempo e necessidade de clareza imediata.</p>
+      </article>
+    </div>
+    <div class="faixa-stats revelar">
+      <div class="stat"><span class="num contador" data-alvo="10">0</span><span class="rotulo">heurísticas aplicadas</span></div>
+      <div class="stat"><span class="num contador" data-alvo="5">0</span><span class="rotulo">telas funcionais</span></div>
+      <div class="stat"><span class="num contador" data-alvo="3">0</span><span class="rotulo">personas mapeadas</span></div>
+      <div class="stat"><span class="num contador" data-alvo="6">0</span><span class="rotulo">wireframes desenhados</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="secao" aria-labelledby="tituloComo">
+  <div class="miolo">
+    <div class="cab-secao revelar">
+      <p class="kicker">Fluxo de uso</p>
+      <h2 id="tituloComo">Três movimentos, uma <em>rotina que gira</em></h2>
+    </div>
+    <div class="passos revelar">
+      <div class="linha-orbital" aria-hidden="true"></div>
+      <article class="passo">
+        <h3>Mapeie seu sistema</h3>
+        <p>Crie suas matérias e veja cada uma virar um planeta — a cor é sua, o tamanho cresce com as tarefas pendentes.</p>
+      </article>
+      <article class="passo">
+        <h3>Entre em órbita</h3>
+        <p>Inicie sessões de foco cronometradas (técnica Pomodoro). Cada minuto estudado alimenta o planeta da matéria escolhida.</p>
+      </article>
+      <article class="passo">
+        <h3>Acenda constelações</h3>
+        <p>Tarefas concluídas viram estrelas conectadas no seu mapa de progresso — a evolução fica visível, não escondida em números.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="secao" id="heuristicas" aria-labelledby="tituloHeur">
+  <div class="miolo">
+    <div class="no-etapa"><span class="no-bola"></span><span>Etapa 02 · Princípios de usabilidade</span></div>
+    <div class="cab-secao revelar">
+      <h2 id="tituloHeur">As 10 heurísticas de Nielsen, <em>aplicadas de verdade</em></h2>
+      <p>Cada princípio abaixo aponta para algo que você pode experimentar agora mesmo <a href="app.html">dentro do sistema</a>.</p>
+    </div>
+    <div class="grade-heur">
+      <article class="heur revelar" style="--atraso:.0s"><span class="h-num">01</span><div><h3>Visibilidade do status do sistema</h3><p>Toasts confirmam cada ação, o anel do cronômetro mostra o tempo restante e os contadores do painel reagem em tempo real. <strong>Teste:</strong> conclua uma tarefa.</p></div></article>
+      <article class="heur revelar" style="--atraso:.06s"><span class="h-num">02</span><div><h3>Correspondência com o mundo real</h3><p>A metáfora do sistema solar traduz conceitos abstratos: matérias são planetas, esforço é órbita, conquista é estrela. A linguagem é a do estudante, não a do sistema.</p></div></article>
+      <article class="heur revelar" style="--atraso:.12s"><span class="h-num">03</span><div><h3>Controle e liberdade do usuário</h3><p>Toda ação destrutiva ou de conclusão oferece <strong>Desfazer</strong> no toast; o cronômetro pausa e zera; modais fecham com <span class="tecla">Esc</span>.</p></div></article>
+      <article class="heur revelar" style="--atraso:.18s"><span class="h-num">04</span><div><h3>Consistência e padrões</h3><p>Um design system único (cores, tipografia, raios e espaçamentos em tokens CSS) governa as três páginas. Botões dourados são sempre a ação primária.</p></div></article>
+      <article class="heur revelar" style="--atraso:.0s"><span class="h-num">05</span><div><h3>Prevenção de erros</h3><p>Excluir uma matéria exige confirmação explícita em diálogo; formulários validam antes de enviar e impedem nomes vazios ou longos demais.</p></div></article>
+      <article class="heur revelar" style="--atraso:.06s"><span class="h-num">06</span><div><h3>Reconhecimento em vez de memorização</h3><p>A navegação fica sempre visível com ícone + texto, e os estados vazios ensinam o próximo passo em vez de deixar a tela em branco.</p></div></article>
+      <article class="heur revelar" style="--atraso:.12s"><span class="h-num">07</span><div><h3>Flexibilidade e eficiência de uso</h3><p>Atalhos de teclado (<span class="tecla">1</span>–<span class="tecla">5</span>, <span class="tecla">espaço</span>, <span class="tecla">?</span>), presets de duração e ações rápidas no painel atendem do novato ao usuário avançado.</p></div></article>
+      <article class="heur revelar" style="--atraso:.18s"><span class="h-num">08</span><div><h3>Estética e design minimalista</h3><p>Uma ação primária por tela, hierarquia tipográfica clara e espaço negativo generoso — o cenário galáctico ambienta sem competir com o conteúdo.</p></div></article>
+      <article class="heur revelar" style="--atraso:.0s"><span class="h-num">09</span><div><h3>Diagnóstico e recuperação de erros</h3><p>Mensagens de erro em linguagem humana dizem o que houve e como corrigir (ex.: “Dê um nome à matéria para continuar”), junto ao campo afetado.</p></div></article>
+      <article class="heur revelar" style="--atraso:.06s"><span class="h-num">10</span><div><h3>Ajuda e documentação</h3><p>Dica contextual na primeira visita, legenda explicando o mapa orbital e um modal de ajuda acessível de qualquer tela com o guia completo.</p></div></article>
+    </div>
+  </div>
+</section>
+
+<section class="secao" id="personas" aria-labelledby="tituloPers">
+  <div class="miolo">
+    <div class="no-etapa"><span class="no-bola"></span><span>Etapa 03 · Modelagem de usuário</span></div>
+    <div class="cab-secao revelar">
+      <h2 id="tituloPers">Para quem o Órbita <em>gira</em></h2>
+      <p>As três personas abaixo também viraram perfis de demonstração dentro do sistema — dá para entrar como cada uma delas.</p>
+    </div>
+    <div class="grade-personas">
+      <article class="cartao persona revelar" style="--atraso:.0s">
+        <div class="p-topo"><span class="p-orbe" style="background:radial-gradient(circle at 32% 30%,#dfe9f5,#7fa8d9 55%,#2b3c58)">L</span><div><h3>Luana Ferreira</h3><span class="p-papel">Persona principal</span></div></div>
+        <div class="p-chips"><span class="p-chip">19 anos</span><span class="p-chip">Estudante de CC · noturno</span><span class="p-chip">Estagiária</span><span class="p-chip">Tec: alta</span></div>
+        <div class="p-bloco"><b>Objetivos</b>Organizar 6 matérias com pouco tempo livre; estudar em blocos curtos entre estágio e aula.</div>
+        <div class="p-bloco"><b>Dores</b>Procrastinação, prazos esquecidos, sensação de que “não rendeu nada” mesmo estudando.</div>
+        <div class="p-bloco"><b>Necessidades</b>Visão imediata do que é urgente e prova visível do próprio progresso.</div>
+      </article>
+      <article class="cartao persona revelar" style="--atraso:.1s">
+        <div class="p-topo"><span class="p-orbe" style="background:radial-gradient(circle at 32% 30%,#e8f0e9,#8fbf9f 55%,#37503f)">C</span><div><h3>Carlos Menezes</h3><span class="p-papel">Persona principal</span></div></div>
+        <div class="p-chips"><span class="p-chip">24 anos</span><span class="p-chip">Estudante de ADS</span><span class="p-chip">Trabalha em turno integral</span><span class="p-chip">Tec: média</span></div>
+        <div class="p-bloco"><b>Objetivos</b>Aproveitar janelas de 25–50 minutos à noite; manter constância sem se cobrar demais.</div>
+        <div class="p-bloco"><b>Dores</b>Cansaço ao fim do dia, dificuldade de retomar o ritmo após semanas corridas.</div>
+        <div class="p-bloco"><b>Necessidades</b>Início de sessão em um toque e metas pequenas que caibam na rotina real.</div>
+      </article>
+      <article class="cartao persona revelar" style="--atraso:.2s">
+        <div class="p-topo"><span class="p-orbe" style="background:radial-gradient(circle at 32% 30%,#f2e6ec,#d98fa8 55%,#5a3a47)">M</span><div><h3>Marta Oliveira</h3><span class="p-papel">Persona secundária</span></div><span class="tag-secundaria">secundária</span></div>
+        <div class="p-chips"><span class="p-chip">41 anos</span><span class="p-chip">Voltando a estudar</span><span class="p-chip">Segunda graduação</span><span class="p-chip">Tec: básica</span></div>
+        <div class="p-bloco"><b>Objetivos</b>Reaprender a estudar com método; não se sentir perdida em ferramentas complexas.</div>
+        <div class="p-bloco"><b>Dores</b>Interfaces cheias de jargão; medo de “apagar tudo sem querer”.</div>
+        <div class="p-bloco"><b>Necessidades</b>Orientação passo a passo, confirmações claras e possibilidade de desfazer qualquer ação.</div>
+      </article>
+    </div>
+    <div class="cab-secao revelar" style="margin-top:1rem">
+      <p class="kicker">Jornada do usuário · Luana</p>
+    </div>
+    <div class="jornada revelar">
+      <article class="etapa-j"><span class="emocao" aria-hidden="true">🤔</span><h4>Descobre o app</h4><p>Chega cética, cansada de listas abandonadas. A metáfora dos planetas desperta curiosidade.</p><p class="oportunidade">Oportunidade: onboarding em 1 tela</p></article>
+      <article class="etapa-j"><span class="emocao" aria-hidden="true">😌</span><h4>Mapeia as matérias</h4><p>Cadastra as 6 disciplinas em minutos e vê seu sistema solar nascer. Sente alívio: “agora dá pra ver tudo”.</p><p class="oportunidade">Oportunidade: importar grade da faculdade</p></article>
+      <article class="etapa-j"><span class="emocao" aria-hidden="true">🎯</span><h4>Primeira sessão de foco</h4><p>Entre o estágio e a aula, roda um pomodoro de 25 min. O anel girando mantém a atenção.</p><p class="oportunidade">Dificuldade: notificações do celular</p></article>
+      <article class="etapa-j"><span class="emocao" aria-hidden="true">🤩</span><h4>Revisa o progresso</h4><p>No fim da semana, vê barras cheias e estrelas conectadas. Orgulho substitui a culpa.</p><p class="oportunidade">Oportunidade: resumo semanal</p></article>
+      <article class="etapa-j"><span class="emocao" aria-hidden="true">💪</span><h4>Cria o hábito</h4><p>A sequência de dias vira motivação própria. Estudar deixou de ser invisível.</p><p class="oportunidade">Oportunidade: metas por matéria</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="secao" id="prototipos" aria-labelledby="tituloProt">
+  <div class="miolo">
+    <div class="no-etapa"><span class="no-bola"></span><span>Etapa 04 · Protótipos</span></div>
+    <div class="cab-secao revelar">
+      <h2 id="tituloProt">Do rascunho ao <em>sistema vivo</em></h2>
+      <p>O projeto tem os dois níveis de fidelidade exigidos — e aqui eles são páginas navegáveis de verdade, não imagens.</p>
+    </div>
+    <div class="grade-2">
+      <article class="cartao cartao-cta revelar" style="--atraso:.05s">
+        <span class="icone-g" aria-hidden="true">✏️</span>
+        <h3>Baixa fidelidade</h3>
+        <p>Seis wireframes das telas principais, com anotações numeradas e as decisões de design que mudaram no caminho até a versão final.</p>
+        <a class="btn btn-fantasma" href="wireframes.html">Ver wireframes</a>
+      </article>
+      <article class="cartao cartao-cta revelar" style="--atraso:.15s">
+        <span class="icone-g" aria-hidden="true">🛰️</span>
+        <h3>Alta fidelidade — funcional</h3>
+        <p>O sistema completo rodando: entrada com perfis de demonstração, cinco telas, pomodoro real, desfazer em tudo, atalhos de teclado e configurações.</p>
+        <a class="btn btn-ouro" href="app.html">Abrir o sistema</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="secao" id="metricas" aria-labelledby="tituloMet">
+  <div class="miolo">
+    <div class="no-etapa"><span class="no-bola"></span><span>Etapas 05 · 06 — Testes &amp; análise</span></div>
+    <div class="cab-secao revelar">
+      <h2 id="tituloMet">Dashboard de <em>métricas de usabilidade</em></h2>
+      <p>Resultados do teste com 5 usuários reais: tarefas guiadas, tempo cronometrado, erros registrados e questionário SUS ao final.</p>
+    </div>
+    <div class="metricas-topo">
+      <div class="cartao metrica-card revelar" style="--atraso:.0s"><span class="m-v" id="mSucesso">—</span><span class="m-r">taxa de sucesso</span></div>
+      <div class="cartao metrica-card revelar" style="--atraso:.08s"><span class="m-v" id="mTempo">—</span><span class="m-r">tempo médio / tarefa</span></div>
+      <div class="cartao metrica-card revelar" style="--atraso:.16s"><span class="m-v" id="mErros">—</span><span class="m-r">erros por usuário</span></div>
+      <div class="cartao metrica-card revelar" style="--atraso:.24s"><span class="m-v" id="mSus">—</span><span class="m-r">pontuação SUS</span></div>
+    </div>
+    <div class="cartao revelar">
+      <h3 style="font-family:var(--serif);font-weight:600;margin-bottom:1.4rem">Taxa de sucesso por tarefa</h3>
+      <div class="tarefas-teste" id="tarefasTeste"></div>
+      <div class="escala-sus">
+        <h3 style="font-family:var(--serif);font-weight:600;margin-bottom:1rem">Escala SUS</h3>
+        <div class="sus-trilho"><span class="sus-marcador" id="susMarcador" style="left:0%"></span></div>
+        <div class="sus-rotulos"><span>0 · ruim</span><span>50</span><span>70 · bom</span><span>100 · excelente</span></div>
+      </div>
+      <p class="nota-ilustrativa">* Valores ilustrativos para demonstração do dashboard — substitua pelos resultados reais coletados no teste com os 5 usuários (objeto <span class="tecla">DADOS_TESTE</span> no código).</p>
+    </div>
+  </div>
+</section>
+
+<section class="secao" aria-labelledby="tituloAcess">
+  <div class="miolo">
+    <div class="cab-secao revelar">
+      <p class="kicker">Bônus · WCAG</p>
+      <h2 id="tituloAcess">Acessibilidade como <em>parte do design</em></h2>
+    </div>
+    <div class="faixa-acess revelar">
+      <div class="item-acess"><span class="ok" aria-hidden="true">✓</span><span><strong>Contraste AA</strong> — texto claro sobre fundo escuro em todas as combinações principais.</span></div>
+      <div class="item-acess"><span class="ok" aria-hidden="true">✓</span><span><strong>Teclado completo</strong> — foco visível, atalhos, modais com Esc e link “pular para o conteúdo”.</span></div>
+      <div class="item-acess"><span class="ok" aria-hidden="true">✓</span><span><strong>Movimento reduzido</strong> — parallax, órbitas e o traço respeitam <em>prefers-reduced-motion</em>.</span></div>
+      <div class="item-acess"><span class="ok" aria-hidden="true">✓</span><span><strong>Semântica + ARIA</strong> — landmarks, rótulos, regiões vivas para toasts e estados anunciados.</span></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="rodape-miolo">
+    <div class="no-etapa no-final"><span class="no-bola"></span><span>Trajetória concluída ✦</span></div>
+    <div class="rodape-linha">
+      <a class="marca" href="#topo"><span class="marca-orbe" aria-hidden="true"></span>ÓRBITA</a>
+      <span class="equipe">Equipe: [Integrante 1] · [Integrante 2] · [Integrante 3] · [Integrante 4]</span>
+    </div>
+    <div class="rodape-linha">
+      <p><a href="app.html">Sistema</a> · <a href="wireframes.html">Wireframes</a></p>
+      <p>Trabalho de Grau 2 — Engenharia de Usabilidade · Prof. Tiago Tomasel · 2026/1</p>
+    </div>
+    <div class="rodape-linha">
+      <p>Protótipo desenvolvido com apoio de IA (Claude, Anthropic), uso citado conforme as regras do trabalho.</p>
+    </div>
+  </div>
+</footer>
+</div>
+
+<noscript><p style="position:fixed;inset:auto 0 0;background:#1a1408;color:#ecd29b;padding:1rem;text-align:center;z-index:300">Esta página precisa de JavaScript habilitado para as partes interativas.</p></noscript>
+
+<script>
+
+(function(){
+'use strict';
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $  = function(s){ return document.querySelector(s); };
+const $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+/* ════════ CÉU ESTRELADO (canvas) — reage ao mouse e ao scroll ════════ */
+const tela = document.getElementById('ceu');
+const ctx  = tela.getContext('2d');
+let W = 0, H = 0, estrelas = [], cadentes = [], rolagem = window.scrollY || 0;
+const alvoMouse  = {x:0, y:0};
+const mouseSuave = {x:0, y:0};
+
+function dimensionar(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  tela.width = W * dpr; tela.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  criarEstrelas();
+  if (RM) desenharEstatico();
+}
+function criarEstrelas(){
+  const n = Math.min(Math.round(W * H / 4200), 340);
+  estrelas = [];
+  for (let i = 0; i < n; i++){
+    const tipo = Math.random();
+    estrelas.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      raio: Math.random() * 1.3 + .35,
+      prof: .25 + Math.random() * .75,
+      tw: Math.random() * Math.PI * 2,
+      vtw: .004 + Math.random() * .02,
+      cor: tipo < .08 ? '236,210,155' : (tipo < .5 ? '236,232,219' : '152,176,220')
+    });
+  }
+}
+function desenharEstrela(s, x, y, alfa){
+  ctx.beginPath();
+  ctx.fillStyle = 'rgba(' + s.cor + ',' + alfa.toFixed(3) + ')';
+  ctx.arc(x, y, s.raio, 0, 6.2832);
+  ctx.fill();
+}
+function desenharEstatico(){
+  ctx.clearRect(0, 0, W, H);
+  for (const s of estrelas) desenharEstrela(s, s.x, s.y, .55);
+}
+
+let proxCadente = 4000 + Math.random() * 5000;
+function quadro(agora){
+  ctx.clearRect(0, 0, W, H);
+  mouseSuave.x += (alvoMouse.x - mouseSuave.x) * .05;
+  mouseSuave.y += (alvoMouse.y - mouseSuave.y) * .05;
+
+  for (const s of estrelas){
+    s.tw += s.vtw;
+    const alfa = .32 + (Math.sin(s.tw) * .5 + .5) * .45 * s.prof;
+    let x = s.x + mouseSuave.x * s.prof * 28;
+    let y = s.y - rolagem * s.prof * .22;
+    x = ((x % W) + W) % W;
+    y = ((y % H) + H) % H;
+    desenharEstrela(s, x, y, alfa);
+  }
+
+  if (agora > proxCadente){
+    proxCadente = agora + 5000 + Math.random() * 7000;
+    cadentes.push({
+      x: Math.random() * W * .8 + W * .1,
+      y: Math.random() * H * .35,
+      vx: 7 + Math.random() * 5,
+      vy: 2.5 + Math.random() * 2,
+      vida: 1
+    });
+  }
+  for (let i = cadentes.length - 1; i >= 0; i--){
+    const c = cadentes[i];
+    c.x += c.vx; c.y += c.vy; c.vida -= .018;
+    if (c.vida <= 0 || c.x > W + 80){ cadentes.splice(i, 1); continue; }
+    const g = ctx.createLinearGradient(c.x, c.y, c.x - c.vx * 9, c.y - c.vy * 9);
+    g.addColorStop(0, 'rgba(236,210,155,' + (c.vida * .9).toFixed(2) + ')');
+    g.addColorStop(1, 'rgba(236,210,155,0)');
+    ctx.strokeStyle = g; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(c.x, c.y);
+    ctx.lineTo(c.x - c.vx * 9, c.y - c.vy * 9);
+    ctx.stroke();
+  }
+
+  /* parallax das nebulosas e inclinação do planeta do hero */
+  for (let i = 0; i < nebulosas.length; i++){
+    const fator = (i + 1) * 9;
+    nebulosas[i].style.transform =
+      'translate3d(' + (mouseSuave.x * -fator) + 'px,' +
+      (mouseSuave.y * -fator - rolagem * (.04 + i * .03)) + 'px,0)';
+  }
+  if (tilt){
+    tilt.style.transform =
+      'rotateY(' + (mouseSuave.x * 7) + 'deg) rotateX(' + (-mouseSuave.y * 7) + 'deg)';
+  }
+  requestAnimationFrame(quadro);
+}
+
+const nebulosas = $$('.nebulosa');
+const tilt = document.getElementById('tilt3d');
+const brilho = document.getElementById('brilhoCursor');
+
+if (!RM){
+  document.addEventListener('mousemove', function(e){
+    alvoMouse.x = (e.clientX / W - .5) * 2;
+    alvoMouse.y = (e.clientY / H - .5) * 2;
+    brilho.style.left = e.clientX + 'px';
+    brilho.style.top  = e.clientY + 'px';
+    brilho.style.opacity = '1';
+  });
+  document.addEventListener('mouseleave', function(){ brilho.style.opacity = '0'; });
+}
+
+/* ════════ SCROLL: barra de progresso + nav compacta ════════ */
+const progScroll = document.getElementById('progScroll');
+const nav = document.getElementById('navPrincipal');
+function aoRolar(){
+  rolagem = window.scrollY;
+  const alcance = document.documentElement.scrollHeight - window.innerHeight;
+  progScroll.style.setProperty('--prog', alcance > 0 ? (rolagem / alcance).toFixed(4) : 0);
+  nav.classList.toggle('compacta', rolagem > 40);
+}
+window.addEventListener('scroll', aoRolar, {passive: true});
+window.addEventListener('resize', dimensionar);
+
+/* ════════ MENU MOBILE ════════ */
+const menuBtn = document.getElementById('menuBtn');
+const navElos = document.getElementById('navElos');
+if (menuBtn && navElos){
+menuBtn.addEventListener('click', function(){
+  const aberto = navElos.classList.toggle('aberto');
+  menuBtn.setAttribute('aria-expanded', aberto);
+  menuBtn.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
+});
+navElos.addEventListener('click', function(e){
+  if (e.target.tagName === 'A'){
+    navElos.classList.remove('aberto');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+}
+
+/* ════════ REVELAÇÃO NO SCROLL ════════ */
+const observador = new IntersectionObserver(function(entradas){
+  entradas.forEach(function(ent){
+    if (ent.isIntersecting){
+      ent.target.classList.add('visivel');
+      observador.unobserve(ent.target);
+    }
+  });
+}, {threshold: .14, rootMargin: '0px 0px -36px 0px'});
+$$('.revelar, .revelar-esq, .revelar-zoom').forEach(function(el){ observador.observe(el); });
+
+/* ════════ CONTADORES ANIMADOS ════════ */
+function animarContador(el){
+  const alvo = parseInt(el.dataset.alvo, 10) || 0;
+  if (RM){ el.textContent = alvo; return; }
+  const inicio = performance.now(), dur = 1300;
+  function passo(t){
+    const p = Math.min((t - inicio) / dur, 1);
+    el.textContent = Math.round(alvo * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(passo);
+  }
+  requestAnimationFrame(passo);
+}
+const obsContador = new IntersectionObserver(function(entradas){
+  entradas.forEach(function(ent){
+    if (ent.isIntersecting){
+      animarContador(ent.target);
+      obsContador.unobserve(ent.target);
+    }
+  });
+}, {threshold: .6});
+$$('.contador').forEach(function(el){ obsContador.observe(el); });
+
+dimensionar();
+aoRolar();
+if (!RM) requestAnimationFrame(quadro);
+
+
+const escMet = function(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+/* ════════════════════════════════════════════════════════════
+   ★ DADOS_TESTE — valores ILUSTRATIVOS do dashboard de métricas.
+   SUBSTITUA pelos resultados reais coletados no teste com 5 usuários
+   (taxa de sucesso, tempo médio, erros e pontuação SUS).
+   ════════════════════════════════════════════════════════════ */
+const DADOS_TESTE = {
+  sucesso: 92,
+  tempoMedio: '1m 42s',
+  errosMedios: '1,2',
+  sus: 84,
+  tarefas: [
+    {nome: 'Criar uma matéria nova', sucesso: 100},
+    {nome: 'Adicionar e concluir uma tarefa', sucesso: 95},
+    {nome: 'Iniciar uma sessão de foco', sucesso: 90},
+    {nome: 'Localizar o progresso semanal', sucesso: 85},
+    {nome: 'Excluir matéria e desfazer', sucesso: 90}
+  ]
+};
+let metricasProntas = false;
+function renderMetricas(){
+  if (metricasProntas) return;
+  metricasProntas = true;
+  document.getElementById('mSucesso').textContent = DADOS_TESTE.sucesso + '%';
+  document.getElementById('mTempo').textContent = DADOS_TESTE.tempoMedio;
+  document.getElementById('mErros').textContent = DADOS_TESTE.errosMedios;
+  document.getElementById('mSus').textContent = DADOS_TESTE.sus;
+  const cont = document.getElementById('tarefasTeste');
+  DADOS_TESTE.tarefas.forEach(function(tar){
+    const linha = document.createElement('div');
+    linha.className = 'linha-teste';
+    linha.innerHTML = '<span>' + escMet(tar.nome) + '</span>' +
+      '<div class="trilho"><div class="preenchimento"></div></div>' +
+      '<span class="pct">' + tar.sucesso + '%</span>';
+    cont.appendChild(linha);
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        linha.querySelector('.preenchimento').style.width = tar.sucesso + '%';
+      });
+    });
+  });
+  document.getElementById('susMarcador').style.left = DADOS_TESTE.sus + '%';
+}
+const obsMetricas = new IntersectionObserver(function(entradas){
+  entradas.forEach(function(ent){
+    if (ent.isIntersecting){
+      renderMetricas();
+      obsMetricas.unobserve(ent.target);
+    }
+  });
+}, {threshold: .2});
+obsMetricas.observe(document.getElementById('metricas'));
+
+
+/* ════════ TRAÇO ORBITAL — desenha a trajetória das etapas no scroll ════════ */
+const trVivo = document.getElementById('tracoVivo');
+const trBase = document.getElementById('tracoBase');
+const trSvg = document.getElementById('tracoSvg');
+const trCometa = document.getElementById('cometa');
+const trNos = $$('.no-etapa');
+let trL = 0, trLensNos = [], trAlvo = 0, trAtual = 0, trPronto = false;
+
+function trTopoDoc(el){
+  const r = el.getBoundingClientRect();
+  return {x: r.left + r.width / 2, y: r.top + window.scrollY + r.height / 2};
+}
+function trConstruir(){
+  const cont = document.getElementById('conteudo');
+  if (!cont || !trVivo) return;
+  const Wp = cont.clientWidth;
+  const Hp = cont.scrollHeight;
+  trSvg.setAttribute('viewBox', '0 0 ' + Wp + ' ' + Hp);
+  trSvg.setAttribute('preserveAspectRatio', 'none');
+
+  const ancoras = [];
+  const heroi = document.querySelector('.heroi');
+  ancoras.push({x: Wp / 2, y: heroi ? heroi.offsetHeight * .82 : 200});
+  trNos.forEach(function(no){
+    const bola = no.querySelector('.no-bola');
+    if (bola) ancoras.push(trTopoDoc(bola));
+  });
+  ancoras.sort(function(a, b){ return a.y - b.y; });
+
+  let d = 'M ' + ancoras[0].x.toFixed(1) + ' ' + ancoras[0].y.toFixed(1);
+  for (let i = 1; i < ancoras.length; i++){
+    const a = ancoras[i - 1], b = ancoras[i];
+    const dy = (b.y - a.y) * .5;
+    d += ' C ' + a.x.toFixed(1) + ' ' + (a.y + dy).toFixed(1) +
+         ' ' + b.x.toFixed(1) + ' ' + (b.y - dy).toFixed(1) +
+         ' ' + b.x.toFixed(1) + ' ' + b.y.toFixed(1);
+  }
+  trVivo.setAttribute('d', d);
+  trBase.setAttribute('d', d);
+  trL = trVivo.getTotalLength();
+  trVivo.style.strokeDasharray = trL;
+
+  /* comprimento acumulado em cada nó (curva desce monotonicamente em y) */
+  trLensNos = [];
+  const passos = 700;
+  let cursor = 0;
+  trNos.forEach(function(no){
+    const bola = no.querySelector('.no-bola');
+    if (!bola) return;
+    const alvoY = trTopoDoc(bola).y - 2;
+    let achado = trL;
+    for (let p = cursor; p <= passos; p++){
+      const len = trL * p / passos;
+      if (trVivo.getPointAtLength(len).y >= alvoY){
+        achado = len; cursor = p; break;
+      }
+    }
+    trLensNos.push({no: no, len: achado});
+  });
+  trPronto = true;
+  trAtualizarAlvo();
+  if (RM){
+    trVivo.style.strokeDashoffset = 0;
+    trNos.forEach(function(n){ n.classList.add('aceso'); });
+    if (trCometa) trCometa.style.display = 'none';
+  }
+}
+function trAtualizarAlvo(){
+  const alcance = document.documentElement.scrollHeight - window.innerHeight;
+  const prog = alcance > 0 ? Math.min(1, Math.max(0, window.scrollY / alcance)) : 1;
+  trAlvo = trL * prog;
+}
+function trQuadro(){
+  if (trPronto){
+    trAtual += (trAlvo - trAtual) * .14;
+    if (Math.abs(trAlvo - trAtual) < .5) trAtual = trAlvo;
+    trVivo.style.strokeDashoffset = Math.max(0, trL - trAtual);
+    const p = trVivo.getPointAtLength(Math.min(trAtual, trL));
+    trCometa.style.transform = 'translate(' + p.x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px)';
+    trCometa.style.opacity = trAtual > 4 ? 1 : 0;
+    for (const par of trLensNos){
+      par.no.classList.toggle('aceso', par.len <= trAtual + 3);
+    }
+  }
+  requestAnimationFrame(trQuadro);
+}
+if (trVivo){
+  window.addEventListener('scroll', trAtualizarAlvo, {passive: true});
+  let trDeb = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(trDeb);
+    trDeb = setTimeout(trConstruir, 220);
+  });
+  window.addEventListener('load', function(){
+    trConstruir();
+    setTimeout(trConstruir, 650); /* reconstroi após fontes carregarem */
+  });
+  trConstruir();
+  if (!RM) requestAnimationFrame(trQuadro);
+}
+
+})();
+</script>
+</body>
+</html>

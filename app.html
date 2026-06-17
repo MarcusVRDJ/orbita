@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════════
+  ÓRBITA · Trabalho de Grau 2 — Engenharia de Usabilidade
+  Páginas: index.html (landing) · app.html (sistema) · wireframes.html
+  Hospede a pasta inteira. Para personalizar, procure por:
+    "EQUIPE" (nomes do grupo) e "DADOS_TESTE" (resultados reais dos testes)
+  ═══════════════════════════════════════════════════════════════════
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Sistema Órbita em funcionamento: perfis de demonstração, matérias como planetas, pomodoro, progresso e configurações.">
+<meta name="theme-color" content="#070a14">
+<title>Órbita · Sistema — protótipo funcional</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script>document.documentElement.className += ' js';</script>
+<style>
+
+/* ════════ TOKENS (Heurística 4 — consistência via design system) ════════ */
+:root{
+  --bg-0:#070a14; --bg-1:#0b1020; --bg-2:#111834; --bg-3:#1a2244;
+  --tinta:#ece8db; --tinta-2:#bcb7a6; --tinta-3:#8d8a7e;
+  --ouro:#d4af6a; --ouro-claro:#ecd29b; --ouro-fundo:rgba(212,175,106,.12);
+  --azul:#7fa8d9; --roxo:#9b8cc9; --verde:#8fbf9f; --rosa:#d98fa8; --laranja:#d9a87f;
+  --erro:#e08c8c; --ok:#8fbf9f;
+  --borda:rgba(212,175,106,.16); --borda-forte:rgba(212,175,106,.34);
+  --vidro:rgba(13,19,40,.62);
+  --serif:'Fraunces',Georgia,serif; --texto:'Spectral',Georgia,serif; --mono:'Space Mono',monospace;
+  --raio:16px; --raio-p:10px;
+  --suave:cubic-bezier(.22,.7,.25,1);
+  --sombra:0 18px 50px rgba(0,0,0,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg-0); color:var(--tinta);
+  font-family:var(--texto); font-weight:300; font-size:1.06rem; line-height:1.7;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+body.trava{overflow:hidden}
+img,svg,canvas{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font:inherit}
+a{color:var(--ouro-claro);text-decoration:none}
+::selection{background:rgba(212,175,106,.32);color:#fff}
+:focus-visible{outline:2px solid var(--ouro);outline-offset:3px;border-radius:4px}
+
+/* acessibilidade */
+.pular{position:absolute;left:-999px;top:0;background:var(--ouro);color:#1a1408;padding:.7rem 1.2rem;z-index:200;font-family:var(--mono);font-size:.85rem;border-radius:0 0 8px 0}
+.pular:focus{left:0}
+.so-leitor{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ════════ FUNDO GALÁCTICO ════════ */
+#ceu{position:fixed;inset:0;z-index:0;pointer-events:none}
+.nebulosa{position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0;will-change:transform}
+.neb-a{width:62vw;height:62vw;top:-22vw;right:-18vw;background:radial-gradient(circle,rgba(212,175,106,.13),transparent 65%)}
+.neb-b{width:55vw;height:55vw;top:48vh;left:-22vw;background:radial-gradient(circle,rgba(127,168,217,.12),transparent 65%)}
+.neb-c{width:48vw;height:48vw;top:130vh;right:-14vw;background:radial-gradient(circle,rgba(155,140,201,.11),transparent 65%)}
+#brilhoCursor{position:fixed;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,rgba(236,210,155,.55),transparent 70%);pointer-events:none;z-index:90;transform:translate(-50%,-50%);mix-blend-mode:screen;opacity:0;transition:opacity .4s}
+@media (hover:none){#brilhoCursor{display:none}}
+
+#conteudo{position:relative;z-index:1}
+
+/* barra de progresso do scroll — cauda de cometa */
+#progScroll{position:fixed;top:0;left:0;height:3px;width:100%;z-index:120;transform-origin:left;transform:scaleX(var(--prog,0));background:linear-gradient(90deg,transparent,var(--ouro) 60%,var(--ouro-claro));box-shadow:0 0 12px rgba(212,175,106,.7)}
+
+/* ════════ NAVEGAÇÃO ════════ */
+#navPrincipal{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.1rem clamp(1.2rem,4vw,3rem);transition:padding .4s var(--suave),background .4s,border-color .4s;border-bottom:1px solid transparent}
+#navPrincipal.compacta{padding-top:.6rem;padding-bottom:.6rem;background:rgba(7,10,20,.78);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom-color:var(--borda)}
+.marca{font-family:var(--serif);font-weight:600;font-size:1.35rem;letter-spacing:.16em;color:var(--tinta);display:flex;align-items:center;gap:.55rem}
+.marca-orbe{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 32% 30%,var(--ouro-claro),var(--ouro) 55%,#6e5526);box-shadow:0 0 12px rgba(212,175,106,.8);position:relative}
+.marca-orbe::after{content:"";position:absolute;inset:-5px -9px;border:1px solid rgba(212,175,106,.5);border-radius:50%;transform:rotateX(68deg)}
+.nav-elos{display:flex;gap:2rem;align-items:center;list-style:none}
+.nav-elos a{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta-2);transition:color .3s}
+.nav-elos a:hover{color:var(--ouro-claro)}
+#menuBtn{display:none;flex-direction:column;gap:5px;padding:.5rem}
+#menuBtn span{width:24px;height:2px;background:var(--tinta);transition:transform .3s var(--suave),opacity .3s}
+#menuBtn[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+#menuBtn[aria-expanded="true"] span:nth-child(2){opacity:0}
+#menuBtn[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* ════════ HERO ════════ */
+.heroi{min-height:100svh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:2rem;padding:7.5rem clamp(1.2rem,5vw,5rem) 4rem;max-width:1400px;margin:0 auto;position:relative}
+.kicker{font-family:var(--mono);font-size:.74rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ouro);display:flex;align-items:center;gap:.8rem}
+.kicker::before{content:"";width:34px;height:1px;background:var(--ouro)}
+.heroi h1{font-family:var(--serif);font-weight:300;font-size:clamp(3.4rem,8.5vw,6.4rem);line-height:1.02;letter-spacing:.01em;margin:1.2rem 0 1.4rem}
+.heroi h1 em{font-style:italic;font-weight:600;color:var(--ouro-claro)}
+.heroi p.sub{font-size:clamp(1.02rem,1.5vw,1.2rem);color:var(--tinta-2);max-width:34rem}
+.heroi-acoes{display:flex;gap:1rem;margin-top:2.4rem;flex-wrap:wrap}
+.selo-g2{display:inline-block;margin-top:2.6rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;color:var(--tinta-3);border:1px solid var(--borda);border-radius:999px;padding:.45rem 1rem}
+
+.btn{display:inline-flex;align-items:center;gap:.6rem;font-family:var(--mono);font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;padding:.95rem 1.7rem;border-radius:999px;transition:transform .3s var(--suave),box-shadow .3s,background .3s,color .3s;border:1px solid transparent}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0)}
+.btn-ouro{background:linear-gradient(135deg,var(--ouro-claro),var(--ouro));color:#1d1506;box-shadow:0 8px 28px rgba(212,175,106,.3)}
+.btn-ouro:hover{box-shadow:0 12px 36px rgba(212,175,106,.45)}
+.btn-fantasma{border-color:var(--borda-forte);color:var(--tinta)}
+.btn-fantasma:hover{background:var(--ouro-fundo)}
+
+/* planeta do hero */
+.heroi-ceu{position:relative;display:grid;place-items:center;perspective:900px}
+.flutuar{animation:flutuar 7s ease-in-out infinite}
+@keyframes flutuar{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+#tilt3d{transform-style:preserve-3d;transition:transform .25s ease-out}
+.planeta-heroi{width:clamp(230px,26vw,360px);aspect-ratio:1;border-radius:50%;position:relative;
+  background:radial-gradient(circle at 31% 28%,#f3deae 0%,var(--ouro) 38%,#8a6a33 68%,#3a2c12 100%);
+  box-shadow:inset -26px -22px 60px rgba(0,0,0,.55),0 0 90px rgba(212,175,106,.35)}
+.planeta-heroi::before{content:"";position:absolute;inset:14% 6% auto;height:9%;border-radius:50%;background:rgba(255,255,255,.07);filter:blur(3px);transform:rotate(-8deg)}
+.planeta-heroi::after{content:"";position:absolute;inset:52% 10% auto;height:7%;border-radius:50%;background:rgba(58,44,18,.35);filter:blur(4px);transform:rotate(-6deg)}
+.anel{position:absolute;left:50%;top:50%;width:172%;height:172%;transform:translate(-50%,-50%) rotateX(74deg);border-radius:50%;border:2px solid rgba(236,210,155,.4);box-shadow:0 0 20px rgba(212,175,106,.25)}
+.anel.fino{width:154%;height:154%;border-color:rgba(236,210,155,.18);border-width:1px}
+.lua-orbita{position:absolute;inset:-14%;animation:girar 26s linear infinite}
+.lua-orbita.dois{inset:-30%;animation-duration:44s;animation-direction:reverse}
+.lua{position:absolute;top:50%;left:0;width:22px;height:22px;margin:-11px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#dfe6f2,var(--azul) 55%,#2b3c58);box-shadow:0 0 14px rgba(127,168,217,.7)}
+.lua-orbita.dois .lua{width:14px;height:14px;margin:-7px;background:radial-gradient(circle at 32% 30%,#e6dff2,var(--roxo) 55%,#3a3258)}
+@keyframes girar{to{transform:rotate(360deg)}}
+
+.indicador-rolar{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.6rem;color:var(--tinta-3);font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase}
+.indicador-rolar .fio{width:1px;height:44px;background:linear-gradient(var(--ouro),transparent);position:relative;overflow:hidden}
+.indicador-rolar .fio::after{content:"";position:absolute;top:-8px;left:-2px;width:5px;height:5px;border-radius:50%;background:var(--ouro-claro);animation:cair 2.2s ease-in infinite}
+@keyframes cair{to{transform:translateY(52px)}}
+
+/* ════════ ESTRUTURA DE SEÇÕES ════════ */
+.secao{padding:clamp(4.5rem,9vw,8rem) clamp(1.2rem,5vw,3rem);scroll-margin-top:80px;position:relative}
+.miolo{max-width:1180px;margin:0 auto}
+.cab-secao{max-width:640px;margin-bottom:clamp(2.5rem,5vw,4rem)}
+.cab-secao h2{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,4.4vw,3.2rem);line-height:1.12;margin:1rem 0 1.1rem}
+.cab-secao h2 em{font-style:italic;color:var(--ouro-claro)}
+.cab-secao p{color:var(--tinta-2)}
+.cartao{background:var(--vidro);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--borda);border-radius:var(--raio);padding:1.8rem;transition:border-color .4s,transform .4s var(--suave)}
+.cartao:hover{border-color:var(--borda-forte)}
+
+/* revelação no scroll */
+.js .revelar{opacity:0;transform:translateY(28px);transition:opacity .9s var(--suave),transform .9s var(--suave);transition-delay:var(--atraso,0s)}
+.js .revelar.visivel{opacity:1;transform:none}
+.js .revelar-esq{opacity:0;transform:translateX(-34px);transition:opacity .9s var(--suave),transform .9s var(--suave);transition-delay:var(--atraso,0s)}
+.js .revelar-esq.visivel{opacity:1;transform:none}
+.js .revelar-zoom{opacity:0;transform:scale(.92);transition:opacity .9s var(--suave),transform .9s var(--suave);transition-delay:var(--atraso,0s)}
+.js .revelar-zoom.visivel{opacity:1;transform:none}
+
+/* O PROJETO */
+.grade-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem}
+.cartao .icone{width:46px;height:46px;border-radius:12px;background:var(--ouro-fundo);border:1px solid var(--borda);display:grid;place-items:center;font-size:1.3rem;margin-bottom:1.1rem}
+.cartao h3{font-family:var(--serif);font-weight:600;font-size:1.22rem;margin-bottom:.55rem}
+.cartao p{color:var(--tinta-2);font-size:.97rem}
+.faixa-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:3.2rem;border-top:1px solid var(--borda);border-bottom:1px solid var(--borda);padding:2rem 0}
+.stat{text-align:center}
+.stat .num{font-family:var(--serif);font-weight:600;font-size:clamp(2rem,4vw,2.9rem);color:var(--ouro-claro);line-height:1}
+.stat .rotulo{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-3);margin-top:.6rem;display:block}
+
+/* COMO FUNCIONA */
+.passos{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem;counter-reset:passo;position:relative}
+.passo{position:relative;padding:2rem 1.6rem;border:1px solid var(--borda);border-radius:var(--raio);background:var(--vidro)}
+.passo::before{counter-increment:passo;content:"0" counter(passo);font-family:var(--mono);font-size:.78rem;letter-spacing:.2em;color:var(--ouro);display:block;margin-bottom:1rem}
+.passo h3{font-family:var(--serif);font-weight:600;font-size:1.3rem;margin-bottom:.6rem}
+.passo p{color:var(--tinta-2);font-size:.96rem}
+.linha-orbital{position:absolute;top:-34px;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,var(--borda-forte),transparent)}
+
+
+/* ════════ PROTÓTIPO — MOLDURA DO APP ════════ */
+.app-moldura{border:1px solid var(--borda-forte);border-radius:22px;overflow:hidden;box-shadow:var(--sombra);background:rgba(9,13,28,.85);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.app-barra-janela{display:flex;align-items:center;gap:.9rem;padding:.8rem 1.2rem;border-bottom:1px solid var(--borda);background:rgba(7,10,20,.6)}
+.pontos{display:flex;gap:.45rem}
+.pontos span{width:11px;height:11px;border-radius:50%;background:var(--bg-3);border:1px solid var(--borda)}
+.url-falsa{flex:1;text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--tinta-3);letter-spacing:.08em}
+.app{display:grid;grid-template-columns:218px 1fr;min-height:620px}
+
+/* navegação interna do app (H6 — reconhecimento: sempre visível) */
+.app-nav{border-right:1px solid var(--borda);padding:1.4rem .9rem;display:flex;flex-direction:column;gap:.35rem;background:rgba(7,10,20,.4)}
+.app-nav .titulo-nav{font-family:var(--mono);font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:var(--tinta-3);padding:0 .8rem .8rem}
+.aba{display:flex;align-items:center;gap:.7rem;width:100%;text-align:left;padding:.72rem .9rem;border-radius:var(--raio-p);font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;color:var(--tinta-2);transition:background .25s,color .25s}
+.aba:hover{background:rgba(212,175,106,.08);color:var(--tinta)}
+.aba[aria-selected="true"]{background:var(--ouro-fundo);color:var(--ouro-claro);border:1px solid var(--borda)}
+.aba .atalho{margin-left:auto;font-size:.62rem;color:var(--tinta-3);border:1px solid var(--borda);border-radius:5px;padding:.06rem .4rem}
+.app-nav .rodape-nav{margin-top:auto;padding:.8rem}
+.btn-ajuda{width:100%;justify-content:center}
+
+.app-telas{padding:clamp(1.2rem,3vw,2.2rem);min-width:0}
+.tela[hidden]{display:none}
+.tela-cab{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:1.6rem;flex-wrap:wrap}
+.tela-cab h3{font-family:var(--serif);font-weight:600;font-size:1.5rem}
+.tela-cab .data{font-family:var(--mono);font-size:.72rem;color:var(--tinta-3);letter-spacing:.1em}
+
+/* dica de primeiro uso (H10) */
+.dica-inicial{display:flex;gap:.8rem;align-items:center;background:var(--ouro-fundo);border:1px solid var(--borda);border-radius:var(--raio-p);padding:.8rem 1rem;font-size:.92rem;color:var(--tinta-2);margin-bottom:1.4rem}
+.dica-inicial button{margin-left:auto;color:var(--tinta-3);font-size:1.1rem;line-height:1;padding:.2rem .4rem}
+.dica-inicial button:hover{color:var(--tinta)}
+
+/* PAINEL */
+.grade-stats-app{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;margin-bottom:1.6rem}
+.stat-app{border:1px solid var(--borda);border-radius:var(--raio-p);padding:1rem;background:rgba(13,19,40,.5)}
+.stat-app .v{font-family:var(--serif);font-weight:600;font-size:1.7rem;color:var(--ouro-claro);line-height:1.1}
+.stat-app .r{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-3);display:block;margin-top:.35rem}
+.bloco-app{border:1px solid var(--borda);border-radius:var(--raio);padding:1.3rem;background:rgba(13,19,40,.5);margin-bottom:1.2rem}
+.bloco-app h4{font-family:var(--serif);font-weight:600;font-size:1.08rem;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.acoes-rapidas{display:flex;gap:.8rem;flex-wrap:wrap}
+
+/* listas de tarefas (H1 — status; H3 — desfazer) */
+.lista-tarefas{list-style:none;display:flex;flex-direction:column;gap:.55rem}
+.item-tarefa{display:flex;align-items:center;gap:.8rem;padding:.65rem .8rem;border:1px solid var(--borda);border-radius:var(--raio-p);background:rgba(7,10,20,.35);transition:border-color .3s}
+.item-tarefa:hover{border-color:var(--borda-forte)}
+.item-tarefa.feita .t-titulo{text-decoration:line-through;color:var(--tinta-3)}
+.t-titulo{flex:1;font-size:.95rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip-materia{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;padding:.18rem .55rem;border-radius:999px;border:1px solid var(--borda);color:var(--tinta-2);white-space:nowrap}
+.caixa{appearance:none;-webkit-appearance:none;width:21px;height:21px;border:1.5px solid var(--borda-forte);border-radius:7px;cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:background .25s,border-color .25s;background:transparent}
+.caixa:checked{background:var(--ouro);border-color:var(--ouro)}
+.caixa:checked::after{content:"✓";color:#1d1506;font-size:.78rem;font-weight:700}
+.t-excluir{color:var(--tinta-3);font-size:1rem;padding:.2rem .45rem;border-radius:6px;opacity:.55;transition:opacity .2s,color .2s}
+.item-tarefa:hover .t-excluir,.t-excluir:focus-visible{opacity:1}
+.t-excluir:hover{color:var(--erro)}
+.vazio{border:1px dashed var(--borda-forte);border-radius:var(--raio-p);padding:1.6rem;text-align:center;color:var(--tinta-3);font-size:.93rem}
+.vazio strong{color:var(--tinta-2);display:block;font-family:var(--serif);font-size:1.05rem;margin-bottom:.3rem}
+
+/* MATÉRIAS — sistema solar (elemento-assinatura) */
+.materias-grade{display:grid;grid-template-columns:1.15fr .85fr;gap:1.4rem;align-items:start}
+.sistema{position:relative;aspect-ratio:1/1;max-width:560px;margin:0 auto;width:100%}
+.sol{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff3d4,var(--ouro-claro) 40%,var(--ouro) 70%,#7a5c26);box-shadow:0 0 46px rgba(212,175,106,.85),0 0 110px rgba(212,175,106,.35);animation:pulsar 4.5s ease-in-out infinite;z-index:2}
+@keyframes pulsar{0%,100%{box-shadow:0 0 46px rgba(212,175,106,.85),0 0 110px rgba(212,175,106,.35)}50%{box-shadow:0 0 60px rgba(212,175,106,1),0 0 150px rgba(212,175,106,.5)}}
+.sol .sol-rotulo{position:absolute;top:110%;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;color:var(--tinta-3);white-space:nowrap}
+.orbita{position:absolute;border:1px dashed rgba(212,175,106,.22);border-radius:50%;animation:girar linear infinite}
+.sistema:hover .orbita,.sistema:hover .contra-giro{animation-play-state:paused}
+.orb-1{inset:31%;animation-duration:42s}
+.orb-2{inset:21%;animation-duration:58s}
+.orb-3{inset:11%;animation-duration:76s}
+.orb-4{inset:1%;animation-duration:96s}
+.planeta{position:absolute;top:0;left:50%;transform:translate(-50%,-50%)}
+.contra-giro{animation:girar linear infinite reverse;display:block}
+.orb-1 .contra-giro{animation-duration:42s}
+.orb-2 .contra-giro{animation-duration:58s}
+.orb-3 .contra-giro{animation-duration:76s}
+.orb-4 .contra-giro{animation-duration:96s}
+.esfera{border-radius:50%;position:relative;display:grid;place-items:center;transition:transform .35s var(--suave),box-shadow .35s;cursor:pointer}
+.esfera:hover{transform:scale(1.12)}
+.esfera.ativa{box-shadow:0 0 0 3px var(--bg-0),0 0 0 5px var(--ouro)!important}
+.esfera.com-anel::before{content:"";position:absolute;left:50%;top:50%;width:158%;height:158%;transform:translate(-50%,-50%) rotateX(72deg);border-radius:50%;border:1.5px solid rgba(236,232,219,.4)}
+.esfera .nome-planeta{position:absolute;top:106%;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;color:var(--tinta-2);white-space:nowrap;background:rgba(7,10,20,.7);padding:.14rem .5rem;border-radius:999px;border:1px solid var(--borda);pointer-events:none}
+.legenda-sistema{text-align:center;font-size:.85rem;color:var(--tinta-3);margin-top:1rem;font-style:italic}
+
+/* painel de detalhe da matéria */
+.detalhe-materia{border:1px solid var(--borda);border-radius:var(--raio);background:rgba(13,19,40,.55);padding:1.4rem;position:sticky;top:90px}
+.det-cab{display:flex;align-items:center;gap:.9rem;margin-bottom:1.1rem}
+.det-orbe{width:40px;height:40px;border-radius:50%;flex-shrink:0}
+.det-cab h4{font-family:var(--serif);font-weight:600;font-size:1.2rem;flex:1;min-width:0}
+.det-meta{display:flex;gap:1.4rem;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--tinta-3);text-transform:uppercase;margin-bottom:1rem;flex-wrap:wrap}
+.det-meta strong{color:var(--ouro-claro);font-weight:400}
+.barra-prog{height:7px;border-radius:999px;background:rgba(236,232,219,.1);overflow:hidden;margin-bottom:1.3rem}
+.barra-prog .preench{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ouro),var(--ouro-claro));transition:width .7s var(--suave)}
+.form-linha{display:flex;gap:.6rem;margin-top:1rem}
+.campo{flex:1;background:rgba(7,10,20,.55);border:1px solid var(--borda);border-radius:var(--raio-p);padding:.65rem .9rem;color:var(--tinta);font-size:.92rem;min-width:0}
+.campo::placeholder{color:var(--tinta-3)}
+.campo:focus{outline:2px solid var(--ouro);outline-offset:1px;border-color:transparent}
+.btn-mini{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;padding:.62rem 1.05rem;border-radius:var(--raio-p);background:var(--ouro);color:#1d1506;transition:transform .25s,box-shadow .25s;white-space:nowrap}
+.btn-mini:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(212,175,106,.35)}
+.btn-mini.contorno{background:transparent;border:1px solid var(--borda-forte);color:var(--tinta-2)}
+.btn-mini.contorno:hover{background:var(--ouro-fundo);color:var(--tinta)}
+.btn-mini.perigo{background:transparent;border:1px solid rgba(224,140,140,.4);color:var(--erro)}
+.btn-mini.perigo:hover{background:rgba(224,140,140,.1)}
+.det-acoes{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+
+/* FOCO — pomodoro */
+.foco-grade{display:grid;grid-template-columns:auto 1fr;gap:clamp(1.5rem,4vw,3rem);align-items:center}
+.anel-wrap{position:relative;width:clamp(220px,30vw,280px);aspect-ratio:1}
+.anel-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.anel-fundo{fill:none;stroke:rgba(236,232,219,.09);stroke-width:7}
+.anel-prog{fill:none;stroke:url(#gradAnel);stroke-width:7;stroke-linecap:round;stroke-dasharray:703.7;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear}
+.anel-centro{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.tempo{font-family:var(--serif);font-weight:300;font-size:clamp(2.6rem,6vw,3.6rem);letter-spacing:.04em;line-height:1}
+.fase{font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--ouro);margin-top:.5rem}
+.foco-controles label{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-3);display:block;margin:1.1rem 0 .5rem}
+.presets{display:flex;gap:.5rem;flex-wrap:wrap}
+.preset{font-family:var(--mono);font-size:.72rem;padding:.45rem .85rem;border:1px solid var(--borda);border-radius:999px;color:var(--tinta-2);transition:all .25s}
+.preset:hover{border-color:var(--borda-forte);color:var(--tinta)}
+.preset[aria-pressed="true"]{background:var(--ouro-fundo);border-color:var(--ouro);color:var(--ouro-claro)}
+.foco-acoes{display:flex;gap:.8rem;margin-top:1.6rem;flex-wrap:wrap}
+.sessoes-info{font-size:.9rem;color:var(--tinta-3);margin-top:1.2rem}
+.sessoes-info strong{color:var(--ouro-claro);font-weight:500}
+
+/* PROGRESSO */
+.prog-grade{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem}
+.grafico{display:flex;align-items:flex-end;gap:.7rem;height:190px;padding-top:.5rem}
+.coluna-dia{flex:1;display:flex;flex-direction:column;align-items:center;gap:.5rem;height:100%;justify-content:flex-end}
+.barra-dia{width:100%;max-width:38px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--ouro-claro),var(--ouro) 60%,rgba(212,175,106,.4));min-height:4px;transition:height .9s var(--suave);position:relative}
+.barra-dia.hoje{box-shadow:0 0 16px rgba(212,175,106,.55)}
+.barra-dia .valor{position:absolute;top:-1.4rem;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.6rem;color:var(--tinta-3);white-space:nowrap}
+.dia-rotulo{font-family:var(--mono);font-size:.62rem;color:var(--tinta-3)}
+#constelacao{width:100%;height:215px}
+#constelacao circle{animation:cintilar 3s ease-in-out infinite}
+#constelacao circle:nth-child(odd){animation-delay:1.4s}
+@keyframes cintilar{0%,100%{opacity:1}50%{opacity:.45}}
+.constel-vazia{font-size:.88rem;color:var(--tinta-3);font-style:italic;text-align:center;padding:3rem 1rem}
+
+/* ════════ COMPONENTES GLOBAIS ════════ */
+.modal{position:fixed;inset:0;z-index:150;display:grid;place-items:center;padding:1.2rem;background:rgba(4,6,12,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.modal[hidden]{display:none}
+.modal-caixa{width:min(440px,100%);background:var(--bg-1);border:1px solid var(--borda-forte);border-radius:var(--raio);padding:1.8rem;box-shadow:var(--sombra);animation:surgir .35s var(--suave)}
+@keyframes surgir{from{opacity:0;transform:translateY(18px) scale(.97)}}
+.modal-caixa h4{font-family:var(--serif);font-weight:600;font-size:1.35rem;margin-bottom:.4rem}
+.modal-caixa .modal-sub{color:var(--tinta-2);font-size:.92rem;margin-bottom:1.3rem}
+.modal-caixa label{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-3);display:block;margin:1rem 0 .45rem}
+.erro-campo{color:var(--erro);font-size:.84rem;margin-top:.4rem;min-height:1.2em}
+.cores-opcoes{display:flex;gap:.6rem;flex-wrap:wrap}
+.cor-opcao{position:relative}
+.cor-opcao input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.cor-opcao .bolinha{width:30px;height:30px;border-radius:50%;display:block;border:2px solid transparent;transition:transform .2s,border-color .2s}
+.cor-opcao input:checked + .bolinha{border-color:var(--tinta);transform:scale(1.15)}
+.cor-opcao input:focus-visible + .bolinha{outline:2px solid var(--ouro);outline-offset:2px}
+.modal-acoes{display:flex;justify-content:flex-end;gap:.7rem;margin-top:1.6rem}
+.lista-ajuda{list-style:none;display:flex;flex-direction:column;gap:.7rem;font-size:.93rem;color:var(--tinta-2)}
+.lista-ajuda strong{color:var(--ouro-claro);font-weight:500}
+.tecla{font-family:var(--mono);font-size:.7rem;border:1px solid var(--borda-forte);border-radius:5px;padding:.1rem .45rem;color:var(--tinta)}
+
+#toastZona{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);z-index:160;display:flex;flex-direction:column;gap:.6rem;align-items:center;width:min(430px,calc(100% - 2rem))}
+.toast{display:flex;align-items:center;gap:.9rem;width:100%;background:var(--bg-2);border:1px solid var(--borda-forte);border-radius:var(--raio-p);padding:.85rem 1.1rem;font-size:.92rem;box-shadow:var(--sombra);animation:surgir .35s var(--suave)}
+.toast .t-msg{flex:1}
+.toast .t-acao{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ouro-claro);border-bottom:1px solid var(--ouro);padding-bottom:.1rem}
+.toast.saindo{opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s}
+
+/* ════════ HEURÍSTICAS ════════ */
+.grade-heur{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem}
+.heur{display:flex;gap:1.2rem;padding:1.5rem;border:1px solid var(--borda);border-radius:var(--raio);background:var(--vidro);transition:border-color .4s,background .4s}
+.heur:hover{border-color:var(--borda-forte);background:rgba(212,175,106,.05)}
+.heur .h-num{font-family:var(--mono);font-size:.8rem;color:var(--ouro);letter-spacing:.1em;padding-top:.2rem}
+.heur h3{font-family:var(--serif);font-weight:600;font-size:1.08rem;margin-bottom:.45rem}
+.heur p{color:var(--tinta-2);font-size:.92rem;line-height:1.6}
+.heur p strong{color:var(--tinta);font-weight:500}
+
+/* ════════ PERSONAS & JORNADA ════════ */
+.grade-personas{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem;margin-bottom:3.5rem}
+.persona{padding:1.7rem}
+.p-topo{display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem}
+.p-orbe{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:1.15rem;color:#10131f;flex-shrink:0}
+.p-topo h3{font-family:var(--serif);font-weight:600;font-size:1.15rem}
+.p-papel{font-size:.84rem;color:var(--tinta-3)}
+.p-chips{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1rem}
+.p-chip{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;border:1px solid var(--borda);border-radius:999px;padding:.22rem .6rem;color:var(--tinta-2)}
+.p-bloco{font-size:.89rem;color:var(--tinta-2);margin-bottom:.7rem}
+.p-bloco b{display:block;font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ouro);font-weight:400;margin-bottom:.25rem}
+.tag-secundaria{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-3);border:1px dashed var(--borda-forte);border-radius:999px;padding:.2rem .7rem;margin-left:auto}
+.jornada{display:grid;grid-template-columns:repeat(5,1fr);gap:.9rem;position:relative;padding-top:1.6rem}
+.jornada::before{content:"";position:absolute;top:0;left:4%;right:4%;height:1px;background:linear-gradient(90deg,transparent,var(--borda-forte),transparent)}
+.etapa-j{padding:1.2rem;border:1px solid var(--borda);border-radius:var(--raio);background:var(--vidro);position:relative}
+.etapa-j::before{content:"";position:absolute;top:-1.85rem;left:50%;transform:translateX(-50%);width:9px;height:9px;border-radius:50%;background:var(--ouro);box-shadow:0 0 12px rgba(212,175,106,.8)}
+.etapa-j .emocao{font-size:1.5rem;display:block;margin-bottom:.5rem}
+.etapa-j h4{font-family:var(--serif);font-weight:600;font-size:.98rem;margin-bottom:.35rem}
+.etapa-j p{font-size:.8rem;color:var(--tinta-2);line-height:1.55}
+.etapa-j .oportunidade{margin-top:.55rem;font-size:.74rem;color:var(--ouro-claro);font-style:italic}
+
+/* ════════ MÉTRICAS ════════ */
+.metricas-topo{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:2.2rem}
+.metrica-card{text-align:center;padding:1.6rem 1rem}
+.metrica-card .m-v{font-family:var(--serif);font-weight:600;font-size:2.3rem;color:var(--ouro-claro);line-height:1}
+.metrica-card .m-r{font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-3);display:block;margin-top:.6rem}
+.tarefas-teste{display:flex;flex-direction:column;gap:1rem}
+.linha-teste{display:grid;grid-template-columns:230px 1fr 52px;gap:1rem;align-items:center;font-size:.92rem}
+.trilho{height:9px;border-radius:999px;background:rgba(236,232,219,.08);overflow:hidden}
+.preenchimento{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ouro),var(--ouro-claro));width:0;transition:width 1.3s var(--suave)}
+.linha-teste .pct{font-family:var(--mono);font-size:.78rem;color:var(--ouro-claro);text-align:right}
+.escala-sus{margin-top:2.4rem}
+.sus-trilho{height:11px;border-radius:999px;background:linear-gradient(90deg,#a35454 0 50%,#a3854f 50% 70%,#7d9c68 70% 85%,#8fbf9f 85% 100%);position:relative;opacity:.92}
+.sus-marcador{position:absolute;top:50%;width:19px;height:19px;border-radius:50%;background:var(--tinta);border:3px solid var(--bg-0);transform:translate(-50%,-50%);box-shadow:0 0 14px rgba(236,232,219,.7)}
+.sus-rotulos{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.62rem;color:var(--tinta-3);margin-top:.55rem;letter-spacing:.08em}
+.nota-ilustrativa{margin-top:1.8rem;font-size:.84rem;color:var(--tinta-3);font-style:italic;border-left:2px solid var(--borda-forte);padding-left:1rem}
+
+/* acessibilidade — faixa */
+.faixa-acess{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.item-acess{display:flex;gap:.8rem;align-items:flex-start;font-size:.88rem;color:var(--tinta-2);border:1px solid var(--borda);border-radius:var(--raio-p);padding:1.1rem;background:var(--vidro)}
+.item-acess .ok{color:var(--ok);font-weight:700}
+
+/* ════════ RODAPÉ ════════ */
+footer{border-top:1px solid var(--borda);padding:3.5rem clamp(1.2rem,5vw,3rem) 2.5rem;position:relative;z-index:1}
+.rodape-miolo{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:1.2rem}
+.rodape-linha{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;align-items:center}
+.rodape-miolo p{font-size:.86rem;color:var(--tinta-3)}
+.rodape-miolo .equipe{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;color:var(--tinta-2)}
+
+/* ════════ RESPONSIVO ════════ */
+@media (max-width:1020px){
+  .grade-heur{grid-template-columns:1fr}
+  .jornada{grid-template-columns:repeat(2,1fr)}
+  .jornada::before{display:none}
+  .etapa-j::before{display:none}
+  .materias-grade{grid-template-columns:1fr}
+  .detalhe-materia{position:static}
+}
+@media (max-width:880px){
+  .heroi{grid-template-columns:1fr;text-align:center;padding-top:7rem;gap:3rem}
+  .kicker{justify-content:center}
+  .heroi p.sub{margin:0 auto}
+  .heroi-acoes{justify-content:center}
+  .heroi-ceu{order:-1;margin-top:1rem}
+  .planeta-heroi{width:clamp(190px,46vw,250px)}
+  .nav-elos{position:fixed;inset:0;background:rgba(7,10,20,.96);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);flex-direction:column;justify-content:center;gap:2.2rem;transform:translateY(-100%);transition:transform .45s var(--suave);z-index:-1}
+  .nav-elos.aberto{transform:translateY(0)}
+  .nav-elos a{font-size:1rem}
+  #menuBtn{display:flex;z-index:5}
+  .grade-3,.passos,.grade-personas{grid-template-columns:1fr}
+  .faixa-stats,.grade-stats-app,.metricas-topo,.faixa-acess{grid-template-columns:repeat(2,1fr)}
+  .app{grid-template-columns:1fr;min-height:0}
+  .app-nav{flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--borda);padding:.7rem .8rem;gap:.4rem}
+  .app-nav .titulo-nav,.app-nav .rodape-nav{display:none}
+  .aba{width:auto;white-space:nowrap;padding:.55rem .85rem}
+  .aba .atalho{display:none}
+  .foco-grade{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .foco-controles{width:100%;max-width:420px}
+  .presets,.foco-acoes{justify-content:center}
+  .prog-grade{grid-template-columns:1fr}
+  .linha-teste{grid-template-columns:1fr;gap:.4rem}
+  .linha-teste .pct{text-align:left}
+}
+@media (max-width:560px){
+  .faixa-stats,.grade-stats-app,.metricas-topo,.faixa-acess{grid-template-columns:1fr 1fr}
+  .jornada{grid-template-columns:1fr}
+  .det-acoes,.acoes-rapidas{flex-direction:column;align-items:stretch}
+  .form-linha{flex-direction:column}
+}
+
+/* movimento reduzido — WCAG */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* ════════ PÁGINA DO SISTEMA — entrada, header e configurações ════════ */
+#navPrincipal.app-header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.65rem clamp(1rem,3vw,2rem);background:rgba(7,10,20,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--borda)}
+.app-header .marca{font-size:1.1rem}
+.sis-rotulo{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--tinta-3)}
+.app-header-dir{display:flex;align-items:center;gap:.7rem}
+.perfil-chip{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.72rem;border:1px solid var(--borda);border-radius:999px;padding:.32rem .85rem;color:var(--tinta-2)}
+.mini-orbe{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+@media (max-width:560px){.sis-rotulo{display:none}}
+
+.entrada{min-height:100svh;display:grid;place-items:center;padding:5rem 1.2rem 3rem;position:relative;z-index:1}
+.entrada-caixa{width:min(780px,100%);text-align:center}
+.marca-grande{font-family:var(--serif);font-weight:300;font-size:clamp(2.6rem,7vw,4.2rem);letter-spacing:.2em;margin:.9rem 0 .4rem}
+.entrada-caixa>p{color:var(--tinta-2);max-width:34rem;margin:0 auto}
+.grade-perfis{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:2.4rem 0 1.5rem}
+.perfil-card{display:flex;flex-direction:column;align-items:center;gap:.65rem;padding:1.6rem 1rem;border:1px solid var(--borda);border-radius:var(--raio);background:var(--vidro);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:transform .35s var(--suave),border-color .35s;cursor:pointer}
+.perfil-card:hover{transform:translateY(-4px);border-color:var(--borda-forte)}
+.perfil-card h3{font-family:var(--serif);font-weight:600;font-size:1.06rem}
+.perfil-card span{font-size:.76rem;color:var(--tinta-3);line-height:1.45}
+.nota-priv{font-size:.8rem;color:var(--tinta-3);font-style:italic}
+@media (max-width:880px){.grade-perfis{grid-template-columns:repeat(2,1fr)}}
+
+#appWrap{padding-top:62px;position:relative;z-index:1}
+.app-pagina .app{min-height:calc(100svh - 62px)}
+.app-pagina .app-nav{padding-top:1.6rem}
+
+.campo-rotulo{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tinta-3);display:block;margin:0 0 .5rem}
+.config-linha{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.55rem 0;flex-wrap:wrap}
+.switch{position:relative;display:inline-flex;align-items:center;gap:.8rem;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.sw-trilho{width:46px;height:25px;border-radius:999px;background:rgba(236,232,219,.13);border:1px solid var(--borda-forte);position:relative;transition:background .3s,border-color .3s;flex-shrink:0}
+.sw-trilho::after{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:var(--tinta-2);transition:left .3s var(--suave),background .3s}
+.switch input:checked + .sw-trilho{background:var(--ouro-fundo);border-color:var(--ouro)}
+.switch input:checked + .sw-trilho::after{left:23px;background:var(--ouro)}
+.switch input:focus-visible + .sw-trilho{outline:2px solid var(--ouro);outline-offset:2px}
+.sw-rotulo{font-size:.92rem;color:var(--tinta-2)}
+.sobre-texto{font-size:.88rem;color:var(--tinta-3);line-height:1.65}
+.rm-forcado .orbita,.rm-forcado .contra-giro{animation-play-state:paused!important}
+.rm-forcado .sol{animation:none!important}
+.rm-forcado #constelacao circle{animation:none!important}
+
+</style>
+</head>
+<body class="app-pagina">
+<a class="pular" href="#appWrap">Pular para o sistema</a>
+<canvas id="ceu" aria-hidden="true"></canvas>
+<div class="nebulosa neb-a" aria-hidden="true"></div>
+<div class="nebulosa neb-b" aria-hidden="true"></div>
+<div id="brilhoCursor" aria-hidden="true"></div>
+<div id="progScroll" aria-hidden="true"></div>
+
+<nav id="navPrincipal" class="app-header" aria-label="Barra do sistema">
+  <a class="marca" href="index.html" title="Voltar ao site"><span class="marca-orbe" aria-hidden="true"></span>ÓRBITA</a>
+  <span class="sis-rotulo">sistema · protótipo funcional</span>
+  <div class="app-header-dir">
+    <span class="perfil-chip"><span class="mini-orbe" id="perfilOrbe" aria-hidden="true"></span><span id="perfilNome">visitante</span></span>
+    <button class="btn-mini contorno" id="sairBtn">Sair</button>
+  </div>
+</nav>
+
+<div id="conteudo">
+
+<section id="telaEntrada" class="entrada" aria-label="Entrada do sistema">
+  <div class="entrada-caixa">
+    <p class="kicker" style="justify-content:center">Protótipo funcional · Trabalho G2</p>
+    <h1 class="marca-grande">ÓRBITA</h1>
+    <p>Escolha um perfil de demonstração para entrar. Cada um carrega um cenário diferente do sistema — inclusive o convidado, que começa do absoluto zero.</p>
+    <div class="grade-perfis">
+      <button class="perfil-card revelar" data-perfil="luana" style="--atraso:.0s">
+        <span class="p-orbe" aria-hidden="true" style="background:radial-gradient(circle at 32% 30%,#dfe9f5,#7fa8d9 55%,#2b3c58)">L</span>
+        <h3>Luana</h3><span>CC noturno · estagiária<br>4 matérias em órbita</span>
+      </button>
+      <button class="perfil-card revelar" data-perfil="carlos" style="--atraso:.08s">
+        <span class="p-orbe" aria-hidden="true" style="background:radial-gradient(circle at 32% 30%,#e8f0e9,#8fbf9f 55%,#37503f)">C</span>
+        <h3>Carlos</h3><span>ADS · turno integral<br>3 matérias em órbita</span>
+      </button>
+      <button class="perfil-card revelar" data-perfil="marta" style="--atraso:.16s">
+        <span class="p-orbe" aria-hidden="true" style="background:radial-gradient(circle at 32% 30%,#f2e6ec,#d98fa8 55%,#5a3a47)">M</span>
+        <h3>Marta</h3><span>Voltando a estudar<br>2 matérias em órbita</span>
+      </button>
+      <button class="perfil-card revelar" data-perfil="convidado" style="--atraso:.24s">
+        <span class="p-orbe" aria-hidden="true" style="background:radial-gradient(circle at 32% 30%,#f3deae,#d4af6a 55%,#6e5526)">✦</span>
+        <h3>Convidado(a)</h3><span>Começar do zero<br>nenhum dado carregado</span>
+      </button>
+    </div>
+    <p class="nota-priv">Demonstração local: os dados são fictícios, vivem apenas nesta aba e zeram ao recarregar — nada é enviado a servidores.</p>
+  </div>
+</section>
+
+<div id="appWrap" hidden>
+  <div class="app">
+    <nav class="app-nav" aria-label="Telas do aplicativo">
+      <span class="titulo-nav">Navegação</span>
+      <button class="aba" role="tab" aria-selected="true" data-tela="painel">🛰️ Painel <span class="atalho">1</span></button>
+      <button class="aba" role="tab" aria-selected="false" data-tela="materias">🪐 Matérias <span class="atalho">2</span></button>
+      <button class="aba" role="tab" aria-selected="false" data-tela="foco">⏱️ Foco <span class="atalho">3</span></button>
+      <button class="aba" role="tab" aria-selected="false" data-tela="progresso">✨ Progresso <span class="atalho">4</span></button>
+      <button class="aba" role="tab" aria-selected="false" data-tela="config">⚙️ Ajustes <span class="atalho">5</span></button>
+      <div class="rodape-nav">
+        <button class="btn-mini contorno btn-ajuda abrir-ajuda">? Ajuda</button>
+      </div>
+    </nav>
+
+    <div class="app-telas">
+      <!-- TELA: PAINEL -->
+      <section class="tela" id="tela-painel" role="tabpanel" aria-label="Painel">
+        <div class="dica-inicial" id="dicaInicial">
+          <span aria-hidden="true">💡</span>
+          <span>Primeira visita? Vá em <strong>Matérias</strong> e clique em um planeta para ver suas tarefas.</span>
+          <button id="fecharDica" aria-label="Dispensar dica">✕</button>
+        </div>
+        <div class="tela-cab">
+          <h3 id="saudacao">Olá!</h3>
+          <span class="data" id="dataHoje"></span>
+        </div>
+        <div class="grade-stats-app">
+          <div class="stat-app"><span class="v" id="statPend">0</span><span class="r">tarefas pendentes</span></div>
+          <div class="stat-app"><span class="v" id="statFeitas">0</span><span class="r">concluídas</span></div>
+          <div class="stat-app"><span class="v" id="statFoco">0</span><span class="r">min de foco hoje</span></div>
+          <div class="stat-app"><span class="v" id="statSeq">0</span><span class="r">dias seguidos</span></div>
+        </div>
+        <div class="bloco-app">
+          <h4>🌠 Próximas tarefas</h4>
+          <ul class="lista-tarefas" id="listaProximas"></ul>
+        </div>
+        <div class="bloco-app">
+          <h4>🚀 Ações rápidas</h4>
+          <div class="acoes-rapidas">
+            <button class="btn-mini" id="acaoFoco">Iniciar sessão de foco</button>
+            <button class="btn-mini contorno abrir-nova-materia">+ Nova matéria</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TELA: MATÉRIAS -->
+      <section class="tela" id="tela-materias" role="tabpanel" aria-label="Matérias" hidden>
+        <div class="tela-cab">
+          <h3>Seu sistema solar</h3>
+          <button class="btn-mini abrir-nova-materia">+ Nova matéria</button>
+        </div>
+        <div class="materias-grade">
+          <div>
+            <div class="sistema" id="sistemaSolar" aria-label="Mapa orbital das matérias"></div>
+            <p class="legenda-sistema">Planetas crescem com as tarefas pendentes · anéis indicam matérias difíceis · passe o mouse para pausar as órbitas</p>
+          </div>
+          <div class="detalhe-materia" id="painelMateria" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- TELA: FOCO -->
+      <section class="tela" id="tela-foco" role="tabpanel" aria-label="Modo foco" hidden>
+        <div class="tela-cab"><h3>Modo foco</h3><span class="data">técnica pomodoro</span></div>
+        <div class="foco-grade">
+          <div class="anel-wrap">
+            <svg viewBox="0 0 260 260" aria-hidden="true">
+              <defs>
+                <linearGradient id="gradAnel" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ecd29b"/><stop offset="100%" stop-color="#d4af6a"/>
+                </linearGradient>
+              </defs>
+              <circle class="anel-fundo" cx="130" cy="130" r="112"/>
+              <circle class="anel-prog" id="anelProg" cx="130" cy="130" r="112"/>
+            </svg>
+            <div class="anel-centro">
+              <div>
+                <div class="tempo" id="tempoTxt" role="timer" aria-live="off">25:00</div>
+                <div class="fase" id="faseTxt">pronto para focar</div>
+              </div>
+            </div>
+          </div>
+          <div class="foco-controles">
+            <label for="seletorMateria">Estudando agora</label>
+            <select class="campo" id="seletorMateria" style="width:100%"></select>
+            <label id="rotuloDuracao">Duração da sessão</label>
+            <div class="presets" role="group" aria-labelledby="rotuloDuracao">
+              <button class="preset" data-min="5" aria-pressed="false">5 min</button>
+              <button class="preset" data-min="15" aria-pressed="false">15 min</button>
+              <button class="preset" data-min="25" aria-pressed="true">25 min</button>
+              <button class="preset" data-min="50" aria-pressed="false">50 min</button>
+            </div>
+            <div class="foco-acoes">
+              <button class="btn-mini" id="btnIniciar">▶ Iniciar</button>
+              <button class="btn-mini contorno" id="btnZerar">Zerar</button>
+            </div>
+            <p class="sessoes-info">Sessões concluídas: <strong id="sessoesTxt">0</strong> · dica: <span class="tecla">espaço</span> inicia ou pausa</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TELA: PROGRESSO -->
+      <section class="tela" id="tela-progresso" role="tabpanel" aria-label="Progresso" hidden>
+        <div class="tela-cab"><h3>Sua evolução</h3><span class="data">últimos 7 dias</span></div>
+        <div class="prog-grade">
+          <div class="bloco-app">
+            <h4>📈 Minutos de foco na semana</h4>
+            <div class="grafico" id="graficoSemana" role="img" aria-label="Gráfico de barras com os minutos de foco por dia da semana"></div>
+          </div>
+          <div class="bloco-app">
+            <h4>✨ Constelação de conquistas</h4>
+            <div id="constelacaoWrap"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TELA: AJUSTES -->
+      <section class="tela" id="tela-config" role="tabpanel" aria-label="Ajustes" hidden>
+        <div class="tela-cab"><h3>Ajustes</h3><span class="data">preferências da sessão</span></div>
+        <div class="bloco-app">
+          <h4>👤 Perfil</h4>
+          <label class="campo-rotulo" for="cfgNome">Nome de exibição</label>
+          <input class="campo" id="cfgNome" style="width:100%;max-width:340px" maxlength="24" autocomplete="off">
+        </div>
+        <div class="bloco-app">
+          <h4>⏱️ Sessões de foco</h4>
+          <label class="campo-rotulo" for="cfgDuracao">Duração padrão</label>
+          <select class="campo" id="cfgDuracao" style="width:100%;max-width:340px">
+            <option value="5">5 minutos</option>
+            <option value="15">15 minutos</option>
+            <option value="25" selected>25 minutos (pomodoro clássico)</option>
+            <option value="50">50 minutos</option>
+          </select>
+        </div>
+        <div class="bloco-app">
+          <h4>🎛️ Experiência</h4>
+          <div class="config-linha">
+            <label class="switch"><input type="checkbox" id="cfgSom" checked><span class="sw-trilho" aria-hidden="true"></span><span class="sw-rotulo">Som ao concluir uma sessão</span></label>
+          </div>
+          <div class="config-linha">
+            <label class="switch"><input type="checkbox" id="cfgMov"><span class="sw-trilho" aria-hidden="true"></span><span class="sw-rotulo">Pausar animações das órbitas</span></label>
+          </div>
+        </div>
+        <div class="bloco-app">
+          <h4>ℹ️ Sobre o protótipo</h4>
+          <p class="sobre-texto">Órbita · protótipo de alta fidelidade do Trabalho G2 de Engenharia de Usabilidade. Dados fictícios, em memória — zeram ao recarregar. Desenvolvido com apoio de IA (Claude, Anthropic), uso citado conforme as regras do trabalho.</p>
+          <div class="det-acoes" style="margin-top:1rem">
+            <button class="btn-mini perigo" id="btnSairConfig">Sair do perfil</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════════ MODAIS ════════ -->
+<div class="modal" id="modalMateria" hidden role="dialog" aria-modal="true" aria-labelledby="tituloModalMat">
+  <div class="modal-caixa">
+    <h4 id="tituloModalMat">Nova matéria</h4>
+    <p class="modal-sub">Ela vai ganhar um planeta no seu sistema solar.</p>
+    <label for="inputNome">Nome da matéria</label>
+    <input class="campo" id="inputNome" style="width:100%" maxlength="34" placeholder="Ex.: Banco de Dados" autocomplete="off">
+    <p class="erro-campo" id="errNome" aria-live="polite"></p>
+    <label id="rotuloCor">Cor do planeta</label>
+    <div class="cores-opcoes" role="radiogroup" aria-labelledby="rotuloCor">
+      <label class="cor-opcao"><input type="radio" name="cor" value="ouro" checked><span class="bolinha" style="background:radial-gradient(circle at 32% 30%,#f3deae,#d4af6a 55%,#6e5526)"></span><span class="so-leitor">Dourado</span></label>
+      <label class="cor-opcao"><input type="radio" name="cor" value="azul"><span class="bolinha" style="background:radial-gradient(circle at 32% 30%,#dfe9f5,#7fa8d9 55%,#2b3c58)"></span><span class="so-leitor">Azul</span></label>
+      <label class="cor-opcao"><input type="radio" name="cor" value="roxo"><span class="bolinha" style="background:radial-gradient(circle at 32% 30%,#e9e3f4,#9b8cc9 55%,#3a3258)"></span><span class="so-leitor">Roxo</span></label>
+      <label class="cor-opcao"><input type="radio" name="cor" value="verde"><span class="bolinha" style="background:radial-gradient(circle at 32% 30%,#e8f0e9,#8fbf9f 55%,#37503f)"></span><span class="so-leitor">Verde</span></label>
+      <label class="cor-opcao"><input type="radio" name="cor" value="rosa"><span class="bolinha" style="background:radial-gradient(circle at 32% 30%,#f2e6ec,#d98fa8 55%,#5a3a47)"></span><span class="so-leitor">Rosa</span></label>
+      <label class="cor-opcao"><input type="radio" name="cor" value="laranja"><span class="bolinha" style="background:radial-gradient(circle at 32% 30%,#f2e8df,#d9a87f 55%,#5a4533)"></span><span class="so-leitor">Laranja</span></label>
+    </div>
+    <label for="selDif">Dificuldade</label>
+    <select class="campo" id="selDif" style="width:100%">
+      <option value="facil">Tranquila</option>
+      <option value="media" selected>Média</option>
+      <option value="dificil">Difícil (ganha anel ✨)</option>
+    </select>
+    <div class="modal-acoes">
+      <button class="btn-mini contorno fechar-modal">Cancelar</button>
+      <button class="btn-mini" id="salvarMateria">Criar matéria</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modalConfirma" hidden role="dialog" aria-modal="true" aria-labelledby="confTitulo">
+  <div class="modal-caixa">
+    <h4 id="confTitulo">Tem certeza?</h4>
+    <p class="modal-sub" id="confTexto"></p>
+    <div class="modal-acoes">
+      <button class="btn-mini contorno fechar-modal">Cancelar</button>
+      <button class="btn-mini perigo" id="confSim">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modalAjuda" hidden role="dialog" aria-modal="true" aria-labelledby="tituloAjuda">
+  <div class="modal-caixa">
+    <h4 id="tituloAjuda">Guia rápido</h4>
+    <p class="modal-sub">Como navegar pelo Órbita.</p>
+    <ul class="lista-ajuda">
+      <li><strong>Matérias</strong> — clique em um planeta para abrir tarefas; planetas maiores têm mais pendências.</li>
+      <li><strong>Foco</strong> — escolha a matéria, a duração e inicie. Ao terminar, os minutos contam no seu progresso.</li>
+      <li><strong>Progresso</strong> — cada tarefa concluída acende uma estrela na constelação.</li>
+      <li><strong>Ajustes</strong> — nome, duração padrão, som e animações; é lá também que se sai do perfil.</li>
+      <li><strong>Atalhos</strong> — <span class="tecla">1</span>–<span class="tecla">5</span> trocam de tela · <span class="tecla">espaço</span> inicia/pausa o foco · <span class="tecla">?</span> abre esta ajuda · <span class="tecla">Esc</span> fecha janelas.</li>
+      <li><strong>Errou?</strong> — quase tudo tem “Desfazer” no aviso que aparece embaixo.</li>
+    </ul>
+    <div class="modal-acoes"><button class="btn-mini fechar-modal">Entendi</button></div>
+  </div>
+</div>
+
+<div id="toastZona" aria-live="polite"></div>
+<noscript><p style="position:fixed;inset:auto 0 0;background:#1a1408;color:#ecd29b;padding:1rem;text-align:center;z-index:300">Este protótipo precisa de JavaScript habilitado.</p></noscript>
+
+<script>
+
+(function(){
+'use strict';
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $  = function(s){ return document.querySelector(s); };
+const $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+/* ════════ CÉU ESTRELADO (canvas) — reage ao mouse e ao scroll ════════ */
+const tela = document.getElementById('ceu');
+const ctx  = tela.getContext('2d');
+let W = 0, H = 0, estrelas = [], cadentes = [], rolagem = window.scrollY || 0;
+const alvoMouse  = {x:0, y:0};
+const mouseSuave = {x:0, y:0};
+
+function dimensionar(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  tela.width = W * dpr; tela.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  criarEstrelas();
+  if (RM) desenharEstatico();
+}
+function criarEstrelas(){
+  const n = Math.min(Math.round(W * H / 4200), 340);
+  estrelas = [];
+  for (let i = 0; i < n; i++){
+    const tipo = Math.random();
+    estrelas.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      raio: Math.random() * 1.3 + .35,
+      prof: .25 + Math.random() * .75,
+      tw: Math.random() * Math.PI * 2,
+      vtw: .004 + Math.random() * .02,
+      cor: tipo < .08 ? '236,210,155' : (tipo < .5 ? '236,232,219' : '152,176,220')
+    });
+  }
+}
+function desenharEstrela(s, x, y, alfa){
+  ctx.beginPath();
+  ctx.fillStyle = 'rgba(' + s.cor + ',' + alfa.toFixed(3) + ')';
+  ctx.arc(x, y, s.raio, 0, 6.2832);
+  ctx.fill();
+}
+function desenharEstatico(){
+  ctx.clearRect(0, 0, W, H);
+  for (const s of estrelas) desenharEstrela(s, s.x, s.y, .55);
+}
+
+let proxCadente = 4000 + Math.random() * 5000;
+function quadro(agora){
+  ctx.clearRect(0, 0, W, H);
+  mouseSuave.x += (alvoMouse.x - mouseSuave.x) * .05;
+  mouseSuave.y += (alvoMouse.y - mouseSuave.y) * .05;
+
+  for (const s of estrelas){
+    s.tw += s.vtw;
+    const alfa = .32 + (Math.sin(s.tw) * .5 + .5) * .45 * s.prof;
+    let x = s.x + mouseSuave.x * s.prof * 28;
+    let y = s.y - rolagem * s.prof * .22;
+    x = ((x % W) + W) % W;
+    y = ((y % H) + H) % H;
+    desenharEstrela(s, x, y, alfa);
+  }
+
+  if (agora > proxCadente){
+    proxCadente = agora + 5000 + Math.random() * 7000;
+    cadentes.push({
+      x: Math.random() * W * .8 + W * .1,
+      y: Math.random() * H * .35,
+      vx: 7 + Math.random() * 5,
+      vy: 2.5 + Math.random() * 2,
+      vida: 1
+    });
+  }
+  for (let i = cadentes.length - 1; i >= 0; i--){
+    const c = cadentes[i];
+    c.x += c.vx; c.y += c.vy; c.vida -= .018;
+    if (c.vida <= 0 || c.x > W + 80){ cadentes.splice(i, 1); continue; }
+    const g = ctx.createLinearGradient(c.x, c.y, c.x - c.vx * 9, c.y - c.vy * 9);
+    g.addColorStop(0, 'rgba(236,210,155,' + (c.vida * .9).toFixed(2) + ')');
+    g.addColorStop(1, 'rgba(236,210,155,0)');
+    ctx.strokeStyle = g; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(c.x, c.y);
+    ctx.lineTo(c.x - c.vx * 9, c.y - c.vy * 9);
+    ctx.stroke();
+  }
+
+  /* parallax das nebulosas e inclinação do planeta do hero */
+  for (let i = 0; i < nebulosas.length; i++){
+    const fator = (i + 1) * 9;
+    nebulosas[i].style.transform =
+      'translate3d(' + (mouseSuave.x * -fator) + 'px,' +
+      (mouseSuave.y * -fator - rolagem * (.04 + i * .03)) + 'px,0)';
+  }
+  if (tilt){
+    tilt.style.transform =
+      'rotateY(' + (mouseSuave.x * 7) + 'deg) rotateX(' + (-mouseSuave.y * 7) + 'deg)';
+  }
+  requestAnimationFrame(quadro);
+}
+
+const nebulosas = $$('.nebulosa');
+const tilt = document.getElementById('tilt3d');
+const brilho = document.getElementById('brilhoCursor');
+
+if (!RM){
+  document.addEventListener('mousemove', function(e){
+    alvoMouse.x = (e.clientX / W - .5) * 2;
+    alvoMouse.y = (e.clientY / H - .5) * 2;
+    brilho.style.left = e.clientX + 'px';
+    brilho.style.top  = e.clientY + 'px';
+    brilho.style.opacity = '1';
+  });
+  document.addEventListener('mouseleave', function(){ brilho.style.opacity = '0'; });
+}
+
+/* ════════ SCROLL: barra de progresso + nav compacta ════════ */
+const progScroll = document.getElementById('progScroll');
+const nav = document.getElementById('navPrincipal');
+function aoRolar(){
+  rolagem = window.scrollY;
+  const alcance = document.documentElement.scrollHeight - window.innerHeight;
+  progScroll.style.setProperty('--prog', alcance > 0 ? (rolagem / alcance).toFixed(4) : 0);
+  nav.classList.toggle('compacta', rolagem > 40);
+}
+window.addEventListener('scroll', aoRolar, {passive: true});
+window.addEventListener('resize', dimensionar);
+
+/* ════════ MENU MOBILE ════════ */
+const menuBtn = document.getElementById('menuBtn');
+const navElos = document.getElementById('navElos');
+if (menuBtn && navElos){
+menuBtn.addEventListener('click', function(){
+  const aberto = navElos.classList.toggle('aberto');
+  menuBtn.setAttribute('aria-expanded', aberto);
+  menuBtn.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
+});
+navElos.addEventListener('click', function(e){
+  if (e.target.tagName === 'A'){
+    navElos.classList.remove('aberto');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+}
+
+/* ════════ REVELAÇÃO NO SCROLL ════════ */
+const observador = new IntersectionObserver(function(entradas){
+  entradas.forEach(function(ent){
+    if (ent.isIntersecting){
+      ent.target.classList.add('visivel');
+      observador.unobserve(ent.target);
+    }
+  });
+}, {threshold: .14, rootMargin: '0px 0px -36px 0px'});
+$$('.revelar, .revelar-esq, .revelar-zoom').forEach(function(el){ observador.observe(el); });
+
+/* ════════ CONTADORES ANIMADOS ════════ */
+function animarContador(el){
+  const alvo = parseInt(el.dataset.alvo, 10) || 0;
+  if (RM){ el.textContent = alvo; return; }
+  const inicio = performance.now(), dur = 1300;
+  function passo(t){
+    const p = Math.min((t - inicio) / dur, 1);
+    el.textContent = Math.round(alvo * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(passo);
+  }
+  requestAnimationFrame(passo);
+}
+const obsContador = new IntersectionObserver(function(entradas){
+  entradas.forEach(function(ent){
+    if (ent.isIntersecting){
+      animarContador(ent.target);
+      obsContador.unobserve(ent.target);
+    }
+  });
+}, {threshold: .6});
+$$('.contador').forEach(function(el){ obsContador.observe(el); });
+
+dimensionar();
+aoRolar();
+if (!RM) requestAnimationFrame(quadro);
+
+
+/* ════════════════════════════════════════════════════════════
+   APP ÓRBITA — estado em memória + interações
+   ════════════════════════════════════════════════════════════ */
+const PALETA = {
+  ouro:    ['#f3deae', '#d4af6a', '#6e5526'],
+  azul:    ['#dfe9f5', '#7fa8d9', '#2b3c58'],
+  roxo:    ['#e9e3f4', '#9b8cc9', '#3a3258'],
+  verde:   ['#e8f0e9', '#8fbf9f', '#37503f'],
+  rosa:    ['#f2e6ec', '#d98fa8', '#5a3a47'],
+  laranja: ['#f2e8df', '#d9a87f', '#5a4533']
+};
+function gradPlaneta(cor){
+  const p = PALETA[cor] || PALETA.ouro;
+  return 'radial-gradient(circle at 32% 30%, ' + p[0] + ', ' + p[1] + ' 55%, ' + p[2] + ')';
+}
+let proxId = 1;
+function nid(){ return 'i' + (proxId++); }
+function t(titulo, feita){ return {id: nid(), titulo: titulo, feita: feita}; }
+
+const estado = {
+  materias: [
+    {id: nid(), nome: 'Algoritmos e Programação', cor: 'azul', dif: 'media', foco: 340, tarefas: [
+      t('Lista de exercícios — for e range', true),
+      t('Simulado de múltipla escolha', true),
+      t('Estudar funções (aula 14)', false),
+      t('Revisar acumuladores e contadores', false)
+    ]},
+    {id: nid(), nome: 'Engenharia de Usabilidade', cor: 'ouro', dif: 'dificil', foco: 280, tarefas: [
+      t('Avaliação heurística', true),
+      t('Personas e jornada do usuário', true),
+      t('Protótipo de alta fidelidade', false),
+      t('Roteiro do teste com 5 usuários', false)
+    ]},
+    {id: nid(), nome: 'Matemática Discreta', cor: 'roxo', dif: 'dificil', foco: 190, tarefas: [
+      t('Exercícios de lógica proposicional', true),
+      t('Resumo de teoria dos conjuntos', false)
+    ]},
+    {id: nid(), nome: 'Inglês Técnico', cor: 'verde', dif: 'facil', foco: 95, tarefas: [
+      t('Vocabulário de programação', true),
+      t('Leitura: artigo de UX', false)
+    ]}
+  ],
+  sessoes: 7,
+  seq: 4,
+  semana: [95, 40, 120, 60, 85, 30, 45] /* seg..dom (min) */
+};
+let selecionada = estado.materias[0].id;
+
+function buscarMateria(id){ return estado.materias.find(function(m){ return m.id === id; }); }
+function pendentes(m){ return m.tarefas.filter(function(x){ return !x.feita; }); }
+function feitas(m){ return m.tarefas.filter(function(x){ return x.feita; }); }
+function hojeIdx(){ return (new Date().getDay() + 6) % 7; }
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c];
+  });
+}
+
+/* ── toasts (H1: status · H3: desfazer) ── */
+const toastZona = document.getElementById('toastZona');
+function toast(msg, acaoTxt, aoAgir){
+  const el = document.createElement('div');
+  el.className = 'toast';
+  const span = document.createElement('span');
+  span.className = 't-msg';
+  span.textContent = msg;
+  el.appendChild(span);
+  let removido = false;
+  function remover(){
+    if (removido) return;
+    removido = true;
+    el.classList.add('saindo');
+    setTimeout(function(){ el.remove(); }, 380);
+  }
+  if (acaoTxt && aoAgir){
+    const b = document.createElement('button');
+    b.className = 't-acao';
+    b.textContent = acaoTxt;
+    b.addEventListener('click', function(){ aoAgir(); remover(); });
+    el.appendChild(b);
+  }
+  toastZona.appendChild(el);
+  while (toastZona.children.length > 3) toastZona.removeChild(toastZona.firstChild);
+  setTimeout(remover, 4500);
+}
+
+/* ── modais ── */
+let ultimoFoco = null;
+function abrirModal(m){
+  ultimoFoco = document.activeElement;
+  m.hidden = false;
+  document.body.classList.add('trava');
+  const f = m.querySelector('input, select, button');
+  if (f) f.focus();
+}
+function fecharModal(m){
+  if (m.hidden) return;
+  m.hidden = true;
+  document.body.classList.remove('trava');
+  if (ultimoFoco && ultimoFoco.focus) ultimoFoco.focus();
+}
+$$('.modal').forEach(function(m){
+  m.addEventListener('click', function(e){ if (e.target === m) fecharModal(m); });
+  m.addEventListener('keydown', function(e){
+    if (e.key !== 'Tab') return;
+    const focaveis = Array.prototype.slice.call(m.querySelectorAll('button, input, select, [href]'));
+    if (!focaveis.length) return;
+    const primeiro = focaveis[0], derradeiro = focaveis[focaveis.length - 1];
+    if (e.shiftKey && document.activeElement === primeiro){ e.preventDefault(); derradeiro.focus(); }
+    else if (!e.shiftKey && document.activeElement === derradeiro){ e.preventDefault(); primeiro.focus(); }
+  });
+});
+$$('.fechar-modal').forEach(function(b){
+  b.addEventListener('click', function(){ fecharModal(b.closest('.modal')); });
+});
+
+/* confirmação (H5: prevenção de erros) */
+const modalConfirma = document.getElementById('modalConfirma');
+let aoConfirmar = null;
+function pedirConfirmacao(titulo, texto, cb){
+  document.getElementById('confTitulo').textContent = titulo;
+  document.getElementById('confTexto').textContent = texto;
+  aoConfirmar = cb;
+  abrirModal(modalConfirma);
+}
+document.getElementById('confSim').addEventListener('click', function(){
+  const cb = aoConfirmar;
+  aoConfirmar = null;
+  fecharModal(modalConfirma);
+  if (cb) cb();
+});
+
+/* ── telas ── */
+const TELAS = ['painel', 'materias', 'foco', 'progresso', 'config'];
+let telaAtiva = 'painel';
+function irTela(nome){
+  if (TELAS.indexOf(nome) < 0) return;
+  telaAtiva = nome;
+  $$('.aba[data-tela]').forEach(function(a){
+    a.setAttribute('aria-selected', a.dataset.tela === nome ? 'true' : 'false');
+  });
+  TELAS.forEach(function(tl){
+    document.getElementById('tela-' + tl).hidden = (tl !== nome);
+  });
+  if (nome === 'progresso') renderProgresso();
+}
+$$('.aba[data-tela]').forEach(function(a){
+  a.addEventListener('click', function(){ irTela(a.dataset.tela); });
+});
+document.getElementById('acaoFoco').addEventListener('click', function(){ irTela('foco'); });
+document.getElementById('fecharDica').addEventListener('click', function(){
+  document.getElementById('dicaInicial').remove();
+});
+$$('.abrir-ajuda').forEach(function(b){
+  b.addEventListener('click', function(){ abrirModal(document.getElementById('modalAjuda')); });
+});
+
+/* ── item de tarefa reutilizável ── */
+function itemTarefa(m, tar, comChip){
+  const li = document.createElement('li');
+  li.className = 'item-tarefa' + (tar.feita ? ' feita' : '');
+  const cx = document.createElement('input');
+  cx.type = 'checkbox';
+  cx.className = 'caixa';
+  cx.checked = tar.feita;
+  cx.setAttribute('aria-label', (tar.feita ? 'Reabrir tarefa: ' : 'Concluir tarefa: ') + tar.titulo);
+  cx.addEventListener('change', function(){ alternarTarefa(m.id, tar.id); });
+  const sp = document.createElement('span');
+  sp.className = 't-titulo';
+  sp.textContent = tar.titulo;
+  li.appendChild(cx);
+  li.appendChild(sp);
+  if (comChip){
+    const chip = document.createElement('span');
+    chip.className = 'chip-materia';
+    chip.textContent = m.nome;
+    chip.style.borderColor = (PALETA[m.cor] || PALETA.ouro)[1];
+    li.appendChild(chip);
+  }
+  const ex = document.createElement('button');
+  ex.className = 't-excluir';
+  ex.textContent = '✕';
+  ex.setAttribute('aria-label', 'Excluir tarefa: ' + tar.titulo);
+  ex.addEventListener('click', function(){ excluirTarefa(m.id, tar.id); });
+  li.appendChild(ex);
+  return li;
+}
+
+/* ── ações sobre tarefas e matérias ── */
+function alternarTarefa(mid, tid){
+  const m = buscarMateria(mid); if (!m) return;
+  const tar = m.tarefas.find(function(x){ return x.id === tid; }); if (!tar) return;
+  tar.feita = !tar.feita;
+  renderTudo();
+  if (tar.feita){
+    toast('Tarefa concluída — uma estrela acendeu ✨', 'Desfazer', function(){
+      tar.feita = false;
+      renderTudo();
+    });
+  }
+}
+function excluirTarefa(mid, tid){
+  const m = buscarMateria(mid); if (!m) return;
+  const idx = m.tarefas.findIndex(function(x){ return x.id === tid; });
+  if (idx < 0) return;
+  const copia = m.tarefas[idx];
+  m.tarefas.splice(idx, 1);
+  renderTudo();
+  toast('Tarefa excluída.', 'Desfazer', function(){
+    m.tarefas.splice(idx, 0, copia);
+    renderTudo();
+  });
+}
+function excluirMateria(id){
+  const idx = estado.materias.findIndex(function(m){ return m.id === id; });
+  if (idx < 0) return;
+  const copia = estado.materias[idx];
+  estado.materias.splice(idx, 1);
+  if (selecionada === id) selecionada = estado.materias.length ? estado.materias[0].id : null;
+  renderTudo();
+  toast('Matéria “' + copia.nome + '” excluída.', 'Desfazer', function(){
+    estado.materias.splice(idx, 0, copia);
+    selecionada = copia.id;
+    renderTudo();
+  });
+}
+
+/* ── nova matéria (H9: erro claro junto ao campo) ── */
+const modalMateria = document.getElementById('modalMateria');
+const inputNome = document.getElementById('inputNome');
+const errNome = document.getElementById('errNome');
+$$('.abrir-nova-materia').forEach(function(b){
+  b.addEventListener('click', function(){
+    inputNome.value = '';
+    errNome.textContent = '';
+    abrirModal(modalMateria);
+  });
+});
+function salvarMateria(){
+  const nome = inputNome.value.trim();
+  if (!nome){
+    errNome.textContent = 'Dê um nome à matéria para continuar.';
+    inputNome.focus();
+    return;
+  }
+  const corSel = document.querySelector('input[name="cor"]:checked');
+  const nova = {
+    id: nid(),
+    nome: nome,
+    cor: corSel ? corSel.value : 'ouro',
+    dif: document.getElementById('selDif').value,
+    foco: 0,
+    tarefas: []
+  };
+  estado.materias.push(nova);
+  selecionada = nova.id;
+  fecharModal(modalMateria);
+  renderTudo();
+  irTela('materias');
+  toast('Novo planeta em órbita: ' + nome + ' 🪐');
+}
+document.getElementById('salvarMateria').addEventListener('click', salvarMateria);
+inputNome.addEventListener('keydown', function(e){ if (e.key === 'Enter') salvarMateria(); });
+
+/* ── render: painel ── */
+function renderPainel(){
+  const h = new Date().getHours();
+  const cumpr = h < 12 ? 'Bom dia' : (h < 18 ? 'Boa tarde' : 'Boa noite');
+  const emoji = h < 12 ? '☀️' : (h < 18 ? '🌤️' : '🌙');
+  document.getElementById('saudacao').textContent = cumpr + ', ' + usuario.nome + '! ' + emoji;
+  document.getElementById('dataHoje').textContent =
+    new Date().toLocaleDateString('pt-BR', {weekday: 'long', day: 'numeric', month: 'long'});
+  let pend = 0, ok = 0;
+  estado.materias.forEach(function(m){
+    pend += pendentes(m).length;
+    ok += feitas(m).length;
+  });
+  document.getElementById('statPend').textContent = pend;
+  document.getElementById('statFeitas').textContent = ok;
+  document.getElementById('statFoco').textContent = estado.semana[hojeIdx()];
+  document.getElementById('statSeq').textContent = estado.seq;
+
+  const ul = document.getElementById('listaProximas');
+  ul.innerHTML = '';
+  const proximas = [];
+  estado.materias.forEach(function(m){
+    pendentes(m).forEach(function(tar){ proximas.push({m: m, tar: tar}); });
+  });
+  if (!proximas.length){
+    ul.innerHTML = '<div class="vazio"><strong>Céu limpo!</strong>Nenhuma tarefa pendente — crie uma matéria ou adicione tarefas na tela Matérias.</div>';
+    return;
+  }
+  proximas.slice(0, 4).forEach(function(par){
+    ul.appendChild(itemTarefa(par.m, par.tar, true));
+  });
+}
+
+/* ── render: sistema solar ── */
+function renderSistema(){
+  const sis = document.getElementById('sistemaSolar');
+  sis.innerHTML = '';
+  const sol = document.createElement('div');
+  sol.className = 'sol';
+  sol.innerHTML = '<span class="sol-rotulo">VOCÊ</span>';
+  sis.appendChild(sol);
+  const anelUsado = {};
+  estado.materias.forEach(function(m, i){
+    const slot = i % 4;
+    const orb = document.createElement('div');
+    orb.className = 'orbita orb-' + (slot + 1);
+    const atraso = (-(Math.floor(i / 4) * 17) - slot * 3) + 's';
+    orb.style.animationDelay = atraso;
+    if (anelUsado[slot]) orb.style.borderColor = 'transparent';
+    anelUsado[slot] = true;
+
+    const pos = document.createElement('div');
+    pos.className = 'planeta';
+    const contra = document.createElement('span');
+    contra.className = 'contra-giro';
+    contra.style.animationDelay = atraso;
+
+    const pl = document.createElement('button');
+    pl.className = 'esfera' + (m.dif === 'dificil' ? ' com-anel' : '') + (m.id === selecionada ? ' ativa' : '');
+    const tam = 44 + Math.min(pendentes(m).length * 6, 26);
+    pl.style.width = tam + 'px';
+    pl.style.height = tam + 'px';
+    pl.style.background = gradPlaneta(m.cor);
+    pl.style.boxShadow = '0 0 18px ' + (PALETA[m.cor] || PALETA.ouro)[1] + '66';
+    pl.setAttribute('aria-label', 'Abrir matéria ' + m.nome + ' — ' + pendentes(m).length + ' tarefas pendentes');
+    const rot = document.createElement('span');
+    rot.className = 'nome-planeta';
+    rot.textContent = m.nome;
+    pl.appendChild(rot);
+    pl.addEventListener('click', function(){ selecionar(m.id); });
+
+    contra.appendChild(pl);
+    pos.appendChild(contra);
+    orb.appendChild(pos);
+    sis.appendChild(orb);
+  });
+}
+function selecionar(id){
+  selecionada = id;
+  renderSistema();
+  renderDetalhe();
+  if (window.innerWidth < 1020){
+    document.getElementById('painelMateria').scrollIntoView({behavior: RM ? 'auto' : 'smooth', block: 'nearest'});
+  }
+}
+
+/* ── render: detalhe da matéria ── */
+function renderDetalhe(){
+  const det = document.getElementById('painelMateria');
+  det.innerHTML = '';
+  const m = buscarMateria(selecionada);
+  if (!m){
+    det.innerHTML = '<div class="vazio"><strong>Nenhum planeta selecionado</strong>Clique em um planeta do sistema para abrir as tarefas da matéria.</div>';
+    return;
+  }
+  const total = m.tarefas.length, ok = feitas(m).length;
+  const pct = total ? Math.round(ok / total * 100) : 0;
+
+  const cab = document.createElement('div');
+  cab.className = 'det-cab';
+  const orbe = document.createElement('span');
+  orbe.className = 'det-orbe';
+  orbe.style.background = gradPlaneta(m.cor);
+  const h4 = document.createElement('h4');
+  h4.textContent = m.nome;
+  cab.appendChild(orbe);
+  cab.appendChild(h4);
+  det.appendChild(cab);
+
+  const meta = document.createElement('div');
+  meta.className = 'det-meta';
+  const rotDif = {facil: 'tranquila', media: 'média', dificil: 'difícil'}[m.dif] || m.dif;
+  meta.innerHTML = '<span><strong>' + ok + '/' + total + '</strong> tarefas</span>' +
+    '<span><strong>' + m.foco + '</strong> min de foco</span>' +
+    '<span>nível <strong>' + esc(rotDif) + '</strong></span>';
+  det.appendChild(meta);
+
+  const barra = document.createElement('div');
+  barra.className = 'barra-prog';
+  barra.innerHTML = '<div class="preench" style="width:0%"></div>';
+  det.appendChild(barra);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ barra.firstChild.style.width = pct + '%'; });
+  });
+
+  const ul = document.createElement('ul');
+  ul.className = 'lista-tarefas';
+  if (!m.tarefas.length){
+    ul.innerHTML = '<div class="vazio"><strong>Planeta sem tarefas</strong>Adicione a primeira no campo abaixo.</div>';
+  } else {
+    m.tarefas.forEach(function(tar){ ul.appendChild(itemTarefa(m, tar, false)); });
+  }
+  det.appendChild(ul);
+
+  const form = document.createElement('div');
+  form.className = 'form-linha';
+  const inp = document.createElement('input');
+  inp.className = 'campo';
+  inp.id = 'inputNovaTarefa';
+  inp.placeholder = 'Nova tarefa…';
+  inp.maxLength = 60;
+  inp.setAttribute('aria-label', 'Título da nova tarefa');
+  const add = document.createElement('button');
+  add.className = 'btn-mini';
+  add.textContent = '+ Adicionar';
+  function adicionar(){
+    const v = inp.value.trim();
+    if (!v){
+      toast('Dê um nome à tarefa para adicionar.');
+      inp.focus();
+      return;
+    }
+    m.tarefas.push(t(v, false));
+    renderTudo();
+    toast('Tarefa adicionada à órbita de ' + m.nome + '.');
+    const novo = document.getElementById('inputNovaTarefa');
+    if (novo) novo.focus();
+  }
+  add.addEventListener('click', adicionar);
+  inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') adicionar(); });
+  form.appendChild(inp);
+  form.appendChild(add);
+  det.appendChild(form);
+
+  const acoes = document.createElement('div');
+  acoes.className = 'det-acoes';
+  const focar = document.createElement('button');
+  focar.className = 'btn-mini contorno';
+  focar.textContent = '⏱ Focar nesta matéria';
+  focar.addEventListener('click', function(){
+    document.getElementById('seletorMateria').value = m.id;
+    irTela('foco');
+  });
+  const excluir = document.createElement('button');
+  excluir.className = 'btn-mini perigo';
+  excluir.textContent = 'Excluir matéria';
+  excluir.addEventListener('click', function(){
+    pedirConfirmacao('Excluir “' + m.nome + '”?',
+      'O planeta, as tarefas e o histórico de foco desta matéria serão removidos. Você ainda poderá desfazer logo após.',
+      function(){ excluirMateria(m.id); });
+  });
+  acoes.appendChild(focar);
+  acoes.appendChild(excluir);
+  det.appendChild(acoes);
+}
+
+/* ── modo foco (pomodoro baseado em Date.now, não acumula atraso) ── */
+const CIRC = 703.7;
+let duracao = 25 * 60, restante = duracao, rodando = false, fimEm = 0, intervalo = null;
+const tempoTxt = document.getElementById('tempoTxt');
+const faseTxt = document.getElementById('faseTxt');
+const anelProg = document.getElementById('anelProg');
+const btnIniciar = document.getElementById('btnIniciar');
+const tituloOriginal = document.title;
+
+function fmt(s){
+  const m = Math.floor(s / 60), r = s % 60;
+  return (m < 10 ? '0' : '') + m + ':' + (r < 10 ? '0' : '') + r;
+}
+function atualizarAnel(){
+  tempoTxt.textContent = fmt(restante);
+  anelProg.style.strokeDashoffset = (CIRC * (1 - restante / duracao)).toFixed(1);
+  document.title = rodando ? fmt(restante) + ' · Órbita' : tituloOriginal;
+}
+function nomeMateriaFoco(){
+  const m = buscarMateria(document.getElementById('seletorMateria').value);
+  return m ? m.nome : 'estudo livre';
+}
+function iniciarPausar(){
+  if (rodando){
+    clearInterval(intervalo);
+    rodando = false;
+    btnIniciar.textContent = '▶ Retomar';
+    faseTxt.textContent = 'pausado';
+  } else {
+    rodando = true;
+    fimEm = Date.now() + restante * 1000;
+    intervalo = setInterval(tique, 250);
+    btnIniciar.textContent = '⏸ Pausar';
+    faseTxt.textContent = 'focando em ' + nomeMateriaFoco();
+  }
+  atualizarAnel();
+}
+function tique(){
+  restante = Math.max(0, Math.ceil((fimEm - Date.now()) / 1000));
+  atualizarAnel();
+  if (restante <= 0) concluirSessao();
+}
+function concluirSessao(){
+  clearInterval(intervalo);
+  rodando = false;
+  const minutos = Math.round(duracao / 60);
+  estado.semana[hojeIdx()] += minutos;
+  estado.sessoes += 1;
+  const m = buscarMateria(document.getElementById('seletorMateria').value);
+  if (m) m.foco += minutos;
+  bip();
+  restante = duracao;
+  btnIniciar.textContent = '▶ Iniciar';
+  faseTxt.textContent = 'sessão concluída ✦';
+  renderTudo();
+  atualizarAnel();
+  toast('Sessão concluída: +' + minutos + ' min em ' + (m ? m.nome : 'estudo livre') + ' ✨');
+}
+function zerar(){
+  clearInterval(intervalo);
+  rodando = false;
+  restante = duracao;
+  btnIniciar.textContent = '▶ Iniciar';
+  faseTxt.textContent = 'pronto para focar';
+  atualizarAnel();
+}
+btnIniciar.addEventListener('click', iniciarPausar);
+document.getElementById('btnZerar').addEventListener('click', zerar);
+$$('.preset').forEach(function(p){
+  p.addEventListener('click', function(){
+    if (rodando){
+      toast('Pause a sessão antes de mudar a duração.');
+      return;
+    }
+    $$('.preset').forEach(function(q){ q.setAttribute('aria-pressed', 'false'); });
+    p.setAttribute('aria-pressed', 'true');
+    duracao = parseInt(p.dataset.min, 10) * 60;
+    restante = duracao;
+    atualizarAnel();
+  });
+});
+let ctxAudio = null;
+function bip(){
+  if (!prefs.som) return;
+  try{
+    ctxAudio = ctxAudio || new (window.AudioContext || window.webkitAudioContext)();
+    if (ctxAudio.state === 'suspended') ctxAudio.resume();
+    [660, 880].forEach(function(freq, i){
+      const o = ctxAudio.createOscillator();
+      const g = ctxAudio.createGain();
+      o.connect(g);
+      g.connect(ctxAudio.destination);
+      o.frequency.value = freq;
+      const t0 = ctxAudio.currentTime + i * .28;
+      g.gain.setValueAtTime(.0001, t0);
+      g.gain.exponentialRampToValueAtTime(.16, t0 + .03);
+      g.gain.exponentialRampToValueAtTime(.0001, t0 + .6);
+      o.start(t0);
+      o.stop(t0 + .65);
+    });
+  } catch(e){ /* áudio indisponível — segue sem som */ }
+}
+function renderFoco(){
+  const sel = document.getElementById('seletorMateria');
+  const atual = sel.value;
+  sel.innerHTML = '';
+  if (!estado.materias.length){
+    const op = document.createElement('option');
+    op.value = '';
+    op.textContent = 'Estudo livre';
+    sel.appendChild(op);
+  }
+  estado.materias.forEach(function(m){
+    const op = document.createElement('option');
+    op.value = m.id;
+    op.textContent = m.nome;
+    sel.appendChild(op);
+  });
+  if (atual && buscarMateria(atual)) sel.value = atual;
+  document.getElementById('sessoesTxt').textContent = estado.sessoes;
+}
+
+/* ── render: progresso ── */
+function renderProgresso(){
+  const graf = document.getElementById('graficoSemana');
+  graf.innerHTML = '';
+  const rotulos = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
+  const hoje = hojeIdx();
+  const maximo = Math.max.apply(null, estado.semana.concat([1]));
+  estado.semana.forEach(function(v, i){
+    const col = document.createElement('div');
+    col.className = 'coluna-dia';
+    const barra = document.createElement('div');
+    barra.className = 'barra-dia' + (i === hoje ? ' hoje' : '');
+    barra.style.height = '4px';
+    barra.innerHTML = '<span class="valor">' + v + 'm</span>';
+    const rot = document.createElement('span');
+    rot.className = 'dia-rotulo';
+    rot.textContent = rotulos[i];
+    col.appendChild(barra);
+    col.appendChild(rot);
+    graf.appendChild(col);
+    const alvoPct = Math.max(4, Math.round(v / maximo * 100));
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ barra.style.height = alvoPct + '%'; });
+    });
+  });
+  renderConstelacao();
+}
+function hashTexto(s){
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+function renderConstelacao(){
+  const wrap = document.getElementById('constelacaoWrap');
+  const concluidas = [];
+  estado.materias.forEach(function(m){
+    m.tarefas.forEach(function(tar){ if (tar.feita) concluidas.push(tar); });
+  });
+  if (!concluidas.length){
+    wrap.innerHTML = '<p class="constel-vazia">Conclua tarefas para acender as primeiras estrelas desta constelação.</p>';
+    return;
+  }
+  const pontos = [];
+  let circulos = '';
+  concluidas.forEach(function(tar){
+    const h = hashTexto(tar.id + tar.titulo);
+    const x = 16 + (h % 288);
+    const y = 20 + ((h >> 5) % 172);
+    pontos.push(x + ',' + y);
+    circulos += '<circle cx="' + x + '" cy="' + y + '" r="5" fill="rgba(236,210,155,.16)"></circle>' +
+      '<circle cx="' + x + '" cy="' + y + '" r="2.1" fill="#ecd29b"><title>' + esc(tar.titulo) + '</title></circle>';
+  });
+  wrap.innerHTML =
+    '<svg id="constelacao" viewBox="0 0 320 215" role="img" aria-label="Constelação com ' +
+    concluidas.length + ' estrelas, uma por tarefa concluída">' +
+    '<polyline points="' + pontos.join(' ') + '" fill="none" stroke="rgba(212,175,106,.38)" stroke-width="1" stroke-dasharray="3 4"></polyline>' +
+    circulos + '</svg>';
+}
+
+
+
+/* ── atalhos de teclado (H7: flexibilidade e eficiência) ── */
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape'){
+    $$('.modal').forEach(function(m){ if (!m.hidden) fecharModal(m); });
+    return;
+  }
+  const alvo = e.target;
+  if (alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'SELECT' || alvo.tagName === 'TEXTAREA')) return;
+  if (e.key >= '1' && e.key <= '5'){
+    irTela(TELAS[parseInt(e.key, 10) - 1]);
+  } else if (e.key === '?'){
+    abrirModal(document.getElementById('modalAjuda'));
+  } else if (e.key === ' ' && telaAtiva === 'foco'){
+    const modalAberto = $$('.modal').some(function(m){ return !m.hidden; });
+    if (!modalAberto){
+      e.preventDefault();
+      iniciarPausar();
+    }
+  }
+});
+
+/* ── inicialização ── */
+function renderTudo(){
+  renderPainel();
+  renderSistema();
+  renderDetalhe();
+  renderFoco();
+  if (telaAtiva === 'progresso') renderProgresso();
+}
+/* inicialização disparada por entrar(perfil) — ver bloco de perfis */
+
+
+/* ════════ ENTRADA, PERFIS DE DEMONSTRAÇÃO E CONFIGURAÇÕES ════════ */
+let usuario = {nome: 'estudante', perfil: null};
+const prefs = {som: true};
+
+function seedsLuana(){
+  return [
+    {id: nid(), nome: 'Algoritmos e Programação', cor: 'azul', dif: 'media', foco: 340, tarefas: [
+      t('Lista de exercícios — for e range', true),
+      t('Simulado de múltipla escolha', true),
+      t('Estudar funções (aula 14)', false),
+      t('Revisar acumuladores e contadores', false)
+    ]},
+    {id: nid(), nome: 'Engenharia de Usabilidade', cor: 'ouro', dif: 'dificil', foco: 280, tarefas: [
+      t('Avaliação heurística', true),
+      t('Personas e jornada do usuário', true),
+      t('Protótipo de alta fidelidade', false),
+      t('Roteiro do teste com 5 usuários', false)
+    ]},
+    {id: nid(), nome: 'Matemática Discreta', cor: 'roxo', dif: 'dificil', foco: 190, tarefas: [
+      t('Exercícios de lógica proposicional', true),
+      t('Resumo de teoria dos conjuntos', false)
+    ]},
+    {id: nid(), nome: 'Inglês Técnico', cor: 'verde', dif: 'facil', foco: 95, tarefas: [
+      t('Vocabulário de programação', true),
+      t('Leitura: artigo de UX', false)
+    ]}
+  ];
+}
+function seedsCarlos(){
+  return [
+    {id: nid(), nome: 'Banco de Dados', cor: 'laranja', dif: 'media', foco: 210, tarefas: [
+      t('Modelagem ER do trabalho', true),
+      t('Exercícios de SQL — joins', false),
+      t('Normalização (3FN)', false)
+    ]},
+    {id: nid(), nome: 'Redes de Computadores', cor: 'azul', dif: 'dificil', foco: 160, tarefas: [
+      t('Resumo do modelo OSI', true),
+      t('Lista de sub-redes', false)
+    ]},
+    {id: nid(), nome: 'Inglês Técnico', cor: 'verde', dif: 'facil', foco: 70, tarefas: [
+      t('Leitura: documentação oficial', false)
+    ]}
+  ];
+}
+function seedsMarta(){
+  return [
+    {id: nid(), nome: 'Introdução à Computação', cor: 'rosa', dif: 'media', foco: 80, tarefas: [
+      t('Conhecer o ambiente virtual', true),
+      t('Exercício: componentes do computador', false)
+    ]},
+    {id: nid(), nome: 'Leitura e Produção de Texto', cor: 'ouro', dif: 'facil', foco: 55, tarefas: [
+      t('Fichamento do capítulo 1', false),
+      t('Rascunho da resenha', false)
+    ]}
+  ];
+}
+const PERFIS = {
+  luana:     {nome: 'Luana',  desc: 'CC noturno · estagiária', cor: 'azul',  seeds: seedsLuana,  sessoes: 7,  seq: 4, semana: [95, 40, 120, 60, 85, 30, 45]},
+  carlos:    {nome: 'Carlos', desc: 'ADS · turno integral',    cor: 'verde', seeds: seedsCarlos, sessoes: 15, seq: 9, semana: [30, 45, 55, 50, 70, 110, 95]},
+  marta:     {nome: 'Marta',  desc: 'segunda graduação',       cor: 'rosa',  seeds: seedsMarta,  sessoes: 3,  seq: 2, semana: [20, 35, 25, 40, 30, 15, 10]},
+  convidado: {nome: 'Convidado(a)', desc: 'começar do zero',   cor: 'ouro',  seeds: function(){ return []; }, sessoes: 0, seq: 0, semana: [0, 0, 0, 0, 0, 0, 0]}
+};
+
+const telaEntrada = document.getElementById('telaEntrada');
+const appWrap = document.getElementById('appWrap');
+
+function entrar(chave){
+  const p = PERFIS[chave] || PERFIS.convidado;
+  usuario = {nome: p.nome, perfil: chave};
+  estado.materias = p.seeds();
+  estado.sessoes = p.sessoes;
+  estado.seq = p.seq;
+  estado.semana = p.semana.slice();
+  selecionada = estado.materias.length ? estado.materias[0].id : null;
+  document.getElementById('perfilNome').textContent = p.nome;
+  document.getElementById('perfilOrbe').style.background = gradPlaneta(p.cor);
+  document.getElementById('cfgNome').value = p.nome;
+  telaEntrada.hidden = true;
+  appWrap.hidden = false;
+  renderTudo();
+  atualizarAnel();
+  irTela('painel');
+  window.scrollTo(0, 0);
+  toast(chave === 'convidado' ? 'Bem-vindo(a)! Comece criando sua primeira matéria 🪐' : 'Bem-vindo(a) de volta, ' + p.nome + '!');
+}
+function sair(){
+  zerar();
+  appWrap.hidden = true;
+  telaEntrada.hidden = false;
+  window.scrollTo(0, 0);
+}
+$$('.perfil-card').forEach(function(b){
+  b.addEventListener('click', function(){ entrar(b.dataset.perfil); });
+});
+document.getElementById('sairBtn').addEventListener('click', sair);
+document.getElementById('btnSairConfig').addEventListener('click', sair);
+
+/* configurações funcionais */
+document.getElementById('cfgNome').addEventListener('input', function(){
+  usuario.nome = this.value.trim() || 'estudante';
+  renderPainel();
+});
+document.getElementById('cfgSom').addEventListener('change', function(){
+  prefs.som = this.checked;
+  toast(prefs.som ? 'Som ao concluir sessões: ativado.' : 'Som desativado.');
+});
+document.getElementById('cfgMov').addEventListener('change', function(){
+  document.documentElement.classList.toggle('rm-forcado', this.checked);
+  toast(this.checked ? 'Animações das órbitas pausadas.' : 'Animações das órbitas reativadas.');
+});
+const cfgDuracao = document.getElementById('cfgDuracao');
+cfgDuracao.addEventListener('change', function(){
+  if (rodando){
+    toast('Pause a sessão antes de mudar a duração.');
+    cfgDuracao.value = String(duracao / 60);
+    return;
+  }
+  duracao = parseInt(cfgDuracao.value, 10) * 60;
+  restante = duracao;
+  $$('.preset').forEach(function(q){
+    q.setAttribute('aria-pressed', q.dataset.min === cfgDuracao.value ? 'true' : 'false');
+  });
+  atualizarAnel();
+});
+$$('.preset').forEach(function(p){
+  p.addEventListener('click', function(){
+    if (!rodando) cfgDuracao.value = p.dataset.min;
+  });
+});
+
+})();
+</script>
+</body>
+</html>
