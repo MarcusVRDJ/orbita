@@ -716,7 +716,7 @@ footer{border-top:1px solid var(--borda);padding:3.5rem clamp(1.2rem,5vw,3rem) 2
     <ul class="lista-ajuda">
       <li><strong>Matérias</strong> — clique em um planeta para abrir tarefas; planetas maiores têm mais pendências.</li>
       <li><strong>Foco</strong> — escolha a matéria, a duração e inicie. Ao terminar, os minutos contam no seu progresso.</li>
-      <li><strong>Progresso</strong> — cada tarefa concluída acende uma estrela na constelação.</li>
+      <li><strong>Progresso</strong> — cada tarefa concluída faz o planeta crescer.</li>
       <li><strong>Ajustes</strong> — nome, duração padrão, som e animações; é lá também que se sai do perfil.</li>
       <li><strong>Atalhos</strong> — <span class="tecla">1</span>–<span class="tecla">5</span> trocam de tela · <span class="tecla">espaço</span> inicia/pausa o foco · <span class="tecla">?</span> abre esta ajuda · <span class="tecla">Esc</span> fecha janelas.</li>
       <li><strong>Errou?</strong> — quase tudo tem “Desfazer” no aviso que aparece embaixo.</li>
@@ -1525,7 +1525,7 @@ function renderConstelacao(){
     m.tarefas.forEach(function(tar){ if (tar.feita) concluidas.push(tar); });
   });
   if (!concluidas.length){
-    wrap.innerHTML = '<p class="constel-vazia">Conclua tarefas para acender as primeiras estrelas desta constelação.</p>';
+    wrap.innerHTML = '<p class="constel-vazia">Conclua tarefas para crescer os planetas.</p>';
     return;
   }
   const pontos = [];
